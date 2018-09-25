@@ -44,23 +44,15 @@ class utilityFunctions:
 
 
     def listChangeScripts(self, BatchEdits):
-        num = range(len(dir(BatchEdits)[:-26]))
-
-            # if you want names and values as a dictionary:
-        args_dict = dict(zip(num , dir(BatchEdits)[:-26]))
-        #print(num)
-        #print(args_dict)
-        #print(dir(BatchEdits)[:-26])
+        ScriptChangesNames = [x for x in dir(BatchEdits) if not '__' in x ]
+        #removed private functions of class since they begin with '__' and end with it
+        num = range(len(ScriptChangesNames))
+        args_dict = dict(zip(num, ScriptChangesNames))
         ChangeScriptsDict = args_dict
-
-        # if you want values as a list:
-        args_values = args_dict.values()
-        #print(args_values)    #def listChangeScripts(self, BatchEdits):
-
         numb = 0
         for key in ChangeScriptsDict.keys():
             numb = numb + 1
-            print (numb, ': ' + dir(BatchEdits)[:-26][key])
+            print (numb, ': ' + ScriptChangesNames[key])
         return ChangeScriptsDict
 
     def ScriptSelect(self):#options list
@@ -125,7 +117,7 @@ class utilityFunctions:
         print ('\n<Converting from XML to MARC>\n')
         subprocess.call(['C:\\%s\\MarcEdit 7\\cmarcedit.exe' % MarcEditDir, '-s', x, '-d', mrcFileName, '-xmlmarc', '-marc8', '-mxslt', 'C:\\%s\\MarcEdit 7\\xslt\\MARC21XML2Mnemonic_plugin.xsl' % MarcEditDir])
         return mrcFileName
-
+        # change this so it would work on marc edit 7 (couldn't download 6)
     def Standardize856_956(self, *args):
         output = []
         #Check 8/956 indicator 1 code for non http URL
@@ -453,11 +445,11 @@ class utilityFunctions:
             }
 
         keys = list(CharRefTransTable)
-        #keys = dict.keys(CharRefTransTable)
+        # dict.key is deprecated I believe
         for key in range(len(keys)):
             x = re.sub(keys[0], keys[1], x)
-        #key = keys[next(iter(keys))]
-        #Flag unknown Char Refs
+            #this follows since we can't use dict.key
+
         UnrecognizedCharRef = list(set(re.findall('&[\d|\w|#]*;', x)))
         if UnrecognizedCharRef:
             #sound bell
@@ -748,6 +740,23 @@ class batchEdits:
         #translate char references, compile to MARC and save
         x = utilities.DeleteLocGov(x)
         x = utilities.Standardize856_956(x, 'Credo reference' )
+        x = utilities.CharRefTrans(x)
+        x = utilities.AddEresourceGMD(x)
+        x = utilities.MarcEditSaveToMRK(x)
+        x = utilities.MarcEditMakeFile(x)
+        return x
+
+    def ER_SprNatureOA(self, x, name='ER-SprNatureOA'):
+        print ('\nRunning change script '+ name + '\n')
+        #break the file
+        x = utilities.MarcEditBreakFile(x)
+        # Change 001 to 002
+        x = re.sub('(?m)^=001  ', '=002  sprn_', x)
+        # Insert 003, 730, 949 before supplied 008
+        x = re.sub('(?m)^=008', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*b3=z;bn=buint;\n=730  0\\$aSpringer Nature eBooks.$5OCU\n=003  ER-SprNatureOA\n=008', x)
+        #translate char references, compile to MARC and save
+        x = utilities.DeleteLocGov(x)
+        x = utilities.Standardize856_956(x, 'SpringerLink' )
         x = utilities.CharRefTrans(x)
         x = utilities.AddEresourceGMD(x)
         x = utilities.MarcEditSaveToMRK(x)
@@ -2119,6 +2128,42 @@ class batchEdits:
         x = utilities.MarcEditMakeFile(x)
         return x
 
+    def ER_WoltersKluwer_Cheetah(self, x, name='ER-WoltersKluwer-Cheetah'):
+        print ('\nRunning change script ' + name + '\n')
+        x = utilities.MarcEditBreakFile(filename)
+        # Change =001 field to =002, and add =003
+        x = re.sub('(?m)^=001  (.*)', '=002  cheetah_\\1\n=003  ER-WlK-Cheetah', x)
+        # ADD 730, 949 fields before supplied 008
+        x = re.sub('(?m)^=008',
+                   r'=949  \\1$luint$rs$t99\n=949  \\\\$a*b3=z;bn=buint;\n=730  0\\$aWolters Kluwer.$pCheetah.$5OCU\n=506  \\\\$aLicensed for use only by University of Cincinnati law faculty and students.\n=008',
+                   x)
+        # Add customized $3 and standard $z at end of 856
+        x = re.sub('(=856.*)', '\\1$3?Cheetah: Access limited to UC Law faculty and students : $zConnect to resource',
+                   x)
+        x = utilities.DeleteLocGov(x)
+        x = utilities.AddEresourceGMD(x)
+        x = utilities.CharRefTrans(x)
+        x = utilities.MarcEditSaveToMRK(x)
+        x = utilities.MarcEditMakeFile(x)
+        return x
+
+    def ER_WoltersKluwer_IntelliConnect(self, x, name='ER-WoltersKluwer-IntelliConnect'):
+        print ('\nRunning change script '+ name + '\n')
+        x = utilities.MarcEditBreakFile(filename)
+        #Change =001 field to =002, and add =003
+        x = re.sub('(?m)^=001  (.*)', '=002  intelliconnect_\\1\n=003  ER-WlK-IntelliConnect', x)
+        #ADD 730, 949 fields before supplied 008
+        x = re.sub('(?m)^=008', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*b3=z;bn=buint;\n=730  0\\$aWolters Kluwer.$pIntelliconnect.$5OCU\n=506  \\\\$aLicensed for use only by University of Cincinnati law faculty and students.\n=008', x)
+        #Add customized $3 and standard $z at end of 856
+        x = re.sub('(=856.*)', '\\1$3IntelliConnect: Access limited to UC Law faculty and students : $zConnect to resource', x)
+        x = utilities.DeleteLocGov(x)
+        x = utilities.AddEresourceGMD(x)
+        x = utilities.CharRefTrans(x)
+        x = utilities.MarcEditSaveToMRK(x)
+        x = utilities.MarcEditMakeFile(x)
+        return x
+
+
     def ER_HeinOnline_ALI(self, x, name='ER-HeinOnline-ALI'):
         print ('\nRunning change script '+ name + '\n')
         x = utilities.MarcEditBreakFile(filename)
@@ -2419,6 +2464,18 @@ class batchEdits:
         x = utilities.AddEresourceGMD(x)
         #x = Bcode2CheckForSerial(x)
         x = utilities.Standardize856_956(x, 'Project MUSE')
+        x = utilities.DeleteLocGov(x)
+        x = utilities.CharRefTrans(x)
+        x = utilities.MarcEditSaveToMRK(x)
+        x = utilities.MarcEditMakeFile(x)
+        return x
+
+    def ER_OL_CH_AELit(self, x, name='ER-O/L-CH-American and English Literature'):
+        print ('\nRunning change script '+ name + '\n')
+        x = utilities.MarcEditBreakFile(x)
+        #Insert 002, 003, 730, 949 before supplied 008
+        x = re.sub('(?m)^=008', r'=949  \\1$lolink$rs$t99\n=949  \\\\$a*bn=bolin;\n=003  ER-O/L-CH-American & English Literature\n=002  O/L-CH-American & English Literature\n=730  0\\$aAmerican & English literature.$5OCU\n=008', x)
+        x = utilities.AddEresourceGMD(x)
         x = utilities.DeleteLocGov(x)
         x = utilities.CharRefTrans(x)
         x = utilities.MarcEditSaveToMRK(x)
