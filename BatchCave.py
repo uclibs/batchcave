@@ -2483,7 +2483,6 @@ class batchEdits:
         return x
 
 reStart = ''
-
 while reStart == '' or reStart == 'y':
     #Instantiate classes
     BatchEdits = batchEdits()
@@ -2513,5 +2512,5 @@ while reStart == '' or reStart == 'y':
     print ('\nOutput File...\n\n\t\tEditing finished ')
     reStart = ''
     while reStart != 'y' and reStart != 'n':
-        reStart = input('\n\n\nWould you like to run BatchCave again? (y/n)\n\n\n')
-
+        reStart = input('\n\n\n Restart BatchCave? \n\n\n')
+        break #break is required here to restart the program or end it
