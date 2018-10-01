@@ -65,12 +65,13 @@ class utilityFunctions:
                     if low <= a <= high:
                         return a
                     else:
-                        print('\nPlease select a number between %d and %d!\a ' % (low, high))
+                        print('\nPlease select a number between %d and %d! ' % (low, high))
                 except ValueError:
-                    print('\nPlease select a number between %d and %d!\a ' % (low, high))
-            return
+                    print('\nPlease select a number between %d and %d! ' % (low, high))
+            return a
         x = ScriptSelectValidate(1, NumberOfOptions)
-        verify = input('\nYou have selected:\n\n\t ' + ChangeScriptsDict[x] + '\n\nConfirm (y/n): ')
+        verify = input('\nYou have selected:\n\n\t ' + ChangeScriptsDict[x-1] + '\n\nConfirm (y/n): ')
+        #must to ChangeScriptDict[x-1] because the index is one value lower than the number selected
         while verify != 'y':
             while verify != 'y' and verify != 'n':
                 verify = input('Please type \'y\' or \'n\'')
@@ -78,7 +79,7 @@ class utilityFunctions:
                 pass
             else:
                 x = ScriptSelectValidate(1, NumberOfOptions)
-                verify = input('\nYou have selected:\n\n\t' + str(x) + '. ' + ChangeScriptsDict[x][1] + '\n\nConfirm (y/n): ')
+                verify = input('\nYou have selected:\n\n\t' + str(x) + '. ' + ChangeScriptsDict[x-1] + '\n\nConfirm (y/n): ')
         return x
 # put in function to determine system
 
@@ -2512,5 +2513,8 @@ while reStart == '' or reStart == 'y':
     print ('\nOutput File...\n\n\t\tEditing finished ')
     reStart = ''
     while reStart != 'y' and reStart != 'n':
-        reStart = input('\n\n\n Restart BatchCave? \n\n\n')
-        break #break is required here to restart the program or end it
+        reStart = input('\n\n\n Would you like to run BatchCave again? \n\n\n')
+        break
+
+        #break #break is required here to restart the program or end it
+        #this doesn't consistently work 
