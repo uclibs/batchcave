@@ -1,0 +1,90 @@
+new BatchEdits added to py2 
+
+def ER_BergFashion(self, x, name='ER-BergFashion'):
+
+def ER_OL_ORE(self, x, name='ER-O/L-ORE'):
+
+def ER_OL_OVSI(self, x, name='ER-O/L-OVSI'):
+
+def ER_OL_databases(self, x, name='ER-O/L-databases'):
+
+def ER_OSEO(self, x, name='ER-OSEO'):
+
+
+
+
+    def ER_BergFashion(self, x, name='ER-BergFashion'):
+        print '\nRunning change script '+ name + '\n'
+        x = utilities.MarcEditBreakFile(filename)
+        #x = re.sub('(?m)^=001  (.*)', '=002  bfl_\\1', x)
+        x = re.sub('(?m)^=001  ', '=002  bfl_', x) 
+        #ADD 003, 006, 007, 533, 730, 949 before supplied 008
+        x = re.sub('(?m)^=008', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*b3=z;bn=buint;\n=730  0\\$aBerg Fashion Library.$5OCU\n=003  ER-BergFashion\n=008', x)
+        x = utilities.DeleteLocGov(x)
+        x = utilities.Standardize856_956(x, 'Bloomsbury Fashion Central')
+        x = utilities.CharRefTrans(x)
+        x = utilities.AddEresourceGMD(x)
+        x = utilities.MarcEditSaveToMRK(x)
+        x = utilities.MarcEditMakeFile(x)
+        return x
+
+    def ER_OL_ORE(self, x, name='ER-O/L-ORE'):
+        print '\nRunning change script '+ name + '\n'
+        x = utilities.MarcEditBreakFile(x)
+        #Insert 002, 003, 730, 949 before supplied 008
+        x = re.sub('(?m)^=008', r'=949  \\1$lolink$rs$t99\n=949  \\\\$a*bn=bolin;\n=003  ER-O/L-ORE\n=002  O/L-ORE\n=008', x)
+        #Change supplied 730 lacking ending period, add .$5OCU to end of line
+        x = re.sub('(?m)^(=730.*OhioLINK research databases\.)', '\\1$5OCU', x)
+        x = re.sub('(?m)^(=730.*OhioLINK research databases(?!\.))', '\\1.$5OCU', x)
+        #x = utilities.Standardize856_956(x, '')
+        x = utilities.DeleteLocGov(x)
+        x = utilities.CharRefTrans(x)
+        x = utilities.MarcEditSaveToMRK(x)
+        x = utilities.MarcEditMakeFile(x)
+        return x
+
+    def ER_OL_OVSI(self, x, name='ER-O/L-OVSI'):
+        print '\nRunning change script '+ name + '\n'
+        x = utilities.MarcEditBreakFile(x)
+        #Insert 002, 003, 730, 949 before supplied 008
+        x = re.sub('(?m)^=008', r'=949  \\1$lolink$rs$t99\n=949  \\\\$a*bn=bolin;\n=730  0\\$aOxford very short introductions.$5OCU\n=003  ER-O/L-OVSI\n=002  O/L-OVSI\n=008', x)
+        #Change supplied 730 lacking ending period, add .$5OCU to end of line
+        #x = re.sub('(?m)^(=730.*OhioLINK research databases\.)', '\\1$5OCU', x)
+        #x = re.sub('(?m)^(=730.*OhioLINK research databases(?!\.))', '\\1.$5OCU', x)
+        #x = utilities.Standardize856_956(x, '')
+        x = utilities.DeleteLocGov(x)
+        x = utilities.CharRefTrans(x)
+        x = utilities.MarcEditSaveToMRK(x)
+        x = utilities.MarcEditMakeFile(x)
+        return x
+
+    def ER_OL_databases(self, x, name='ER-O/L-databases'):
+        print '\nRunning change script '+ name + '\n'
+        x = utilities.MarcEditBreakFile(x)
+        #Insert 002, 003, 730, 949 before supplied 008
+        x = re.sub('(?m)^=008', r'=949  \\1$lolink$rs$t99\n=949  \\\\$a*bn=bolin;\n=003  ER-O/L-databases\n=002  O/L-databases\n=008', x)
+        #Change supplied 730 lacking ending period, add .$5OCU to end of line
+        x = re.sub('(?m)^(=730.*OhioLINK research databases\.)', '\\1$5OCU', x)
+        x = re.sub('(?m)^(=730.*OhioLINK research databases(?!\.))', '\\1.$5OCU', x)
+        #x = utilities.Standardize856_956(x, '')
+        x = utilities.DeleteLocGov(x)
+        x = utilities.CharRefTrans(x)
+        x = utilities.MarcEditSaveToMRK(x)
+        x = utilities.MarcEditMakeFile(x)
+        return x
+
+    def ER_OSEO(self, x, name='ER-OSEO'):
+        print '\nRunning change script '+ name + '\n'
+        x = utilities.MarcEditBreakFile(filename)
+        #x = re.sub('(?m)^=001  (.*)', '=002  oseo_\\1', x)
+        x = re.sub('(?m)^=001  ', '=002  oseo_', x) 
+        #ADD 003, 006, 007, 533, 730, 949 before supplied 008
+        x = re.sub('(?m)^=008', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*b3=z;bn=buint;\n=730  0\\$aOxford scholarly editions online.$5OCU\n=003  ER-OSEO\n=008', x)
+        x = re.sub('(?m)^(=856.*)', '\\1$zConnect to resource', x)
+        x = utilities.DeleteLocGov(x)
+        #x = utilities.Standardize856_956(x, '')
+        x = utilities.CharRefTrans(x)
+        x = utilities.AddEresourceGMD(x)
+        x = utilities.MarcEditSaveToMRK(x)
+        x = utilities.MarcEditMakeFile(x)
+        return x

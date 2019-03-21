@@ -1,0 +1,93 @@
+ER-ASCE-Library	730	|aASCE Library.|5OCU
+ER-ASP-CTV	730	|aAlexander Street Press.|pCounseling and therapy in video.|5OCU
+ER-ASP-GLTC	730	|aAlexander Street Press.|pLGBT thought and culture.|5OCU
+ER-ASP-WASI	730	|aAlexander Street Press.|pWomen and social movements, international.|5OCU
+ER-ASP-WASME	730	|aAlexander Street Press.|pWomen and social movements in modern empires since 1820.|5OCU
+ER-ASP-WASS	730	|aAlexander Street Press.|pWomen and social movements: scholar's edition.|5OCU
+ER-CC-Music	730	|aCambridge companions to music online.|5OCU
+ER-CCO	730	|aCambridge companions  online.|5OCU
+ER-CH-AWS	730	|aAfrican writers series (Online).|5OCU
+ER-CH-LION	730	|aChadwyck-Healey Literature online.|5OCU
+ER-CHO	730	|aCambridge histories online.|5OCU
+ER-CRCnetBASE MRTS	730	|aCRCnetBASE.|5OCU
+ER-CREDOREF	730	|aCredo reference.|5OCU
+ER-DOAB	730	|aDirectory of open access books.|5OCU
+ER-EAI-1st	730	|aEarly American imprints (Online).|nFirst series,|pEvans.|5OCU
+ER-EAI-2nd	730	|aEarly American imprints (Online).|nSecond series,|pShaw-Shoemaker.|5OCU
+ER-ECCO	730	|aEighteenth century collections online.|5OCU
+ER-ECCO2	730	|aEighteenth century collections online.|5OCU
+ER-Emrld-BME	730	|aEmerald business, management and economics ebook series.|5OCU
+ER-GSL	730	|aGeological Society special publication.|5OCU
+ER-GSW	730	|aGeoScienceWorld.|5OCU
+ER-HeinOnline	730	|aHeinOnline Legal Classics collection.|5OCU
+ER-HeinOnline-ALI	730	|aHeinOnline.|pAmerican Law Institute Library.|5OCU
+ER-ICE-virtual-lib	730	|aICE virtual library.|5OCU
+ER-IET	730	|aIET digital library.|pIET ebooks.|5OCU
+ER-InfoSci	730	|aIGI Global Research Collection.|pInfoSci.|5OCU
+ER-LEXIS-Primary	730	|aLEXIS Primary sources collection.|5OCU
+ER-LoebCL	730	|aDigital Loeb Classical Library.|5OCU
+ER-MOML	730	|aMaking of modern law (Online).|5OCU
+ER-MOMW	730	|aMaking of the modern world (Online).|5OCU
+ER-MOMW-2	730	|aMaking of the modern world (Online).|5OCU
+ER-MoA	730	|aMaking of America (University of Michigan).|5OCU
+ER-Momentum	730	|aMomentum Press ebooks.|5OCU
+ER-NBER	730	|aNBER working paper series online.|5OCU
+ER-NCCO	730	|aNineteenth Century collections online.|5OCU
+ER-O/L-ABC-Clio	730	|aABC-Clio E-Books.|5OCU
+ER-O/L-ACLS	730	|aACLS History E-Books.|5OCU
+ER-O/L-ACLS	730	|aHistory E-Book project.|5OCU
+ER-O/L-APA Books	730	|aAPA Books.|5OCU
+ER-O/L-CH-American & English Literature	730	|aAmerican & English Literature.|5OCU
+ER-O/L-CH-American & English Literature	730	|aAmerican & English literature.|5OCU
+ER-O/L-Cambridge	730	|aCambridge Books Online.|5OCU
+ER-O/L-GVRL	730	|aGale virtual reference library (Online).|5OCU
+ER-O/L-IOP	730	|aInstitute of Physics ebooks.|5OCU
+ER-O/L-NetLibrary	730	|aNetLibrary E-Books.|5OCU
+ER-O/L-OR	730	|aOxford reference.|5OCU
+ER-O/L-OSO	730	|aOxford scholarship online.|5OCU
+ER-O/L-SPRebk	730	|aSpringer ebooks.|5OCU
+ER-O/L-SPRebk-GAP2010ou	730	|aSpringer ebooks.|5OCU
+ER-O/L-SPRebk-GAP2011ou	730	|aSpringer ebooks.|5OCU
+ER-O/L-SPRebk-OSU1	730	|aSpringer ebooks.|5OCU
+ER-O/L-SPRebk-OSU10	730	|aSpringer ebooks.|5OCU
+ER-O/L-SPRebk-OSU11	730	|aSpringer ebooks.|5OCU
+ER-O/L-SPRebk-OSU2	730	|aSpringer ebooks.|5OCU
+ER-O/L-SPRebk-OSU3	730	|aSpringer ebooks.|5OCU
+ER-O/L-SPRebk-OSU4	730	|aSpringer ebooks.|5OCU
+ER-O/L-SPRebk-OSU5	730	|aSpringer ebooks.|5OCU
+ER-O/L-SPRebk-OSU6	730	|aSpringer ebooks.|5OCU
+ER-O/L-SPRebk-OSU7	730	|aSpringer ebooks.|5OCU
+ER-O/L-SPRebk-OSU8	730	|aSpringer ebooks.|5OCU
+ER-O/L-SPRebk-OSU9	730	|aSpringer ebooks.|5OCU
+ER-O/L-Safari	730	|aSafari books online.|5OCU
+ER-O/L-Sage-eRef	730	|aSage eReference.|5OCU
+ER-O/L-UPSO	730	|aUniversity Press Scholarship Online.|5OCU
+ER-O/L-Wiley	730	|aWiley online library.|5OCU
+ER-OCLC-WCS-ACS	730	|aACS Symposium series.|5OCU
+ER-OCLC-WCS-ClinKey	730	|aClinicalKey.|5OCU
+ER-OCLC-WCS-IEEE-Xplore	730	|aIEEE Xplore digital library.|5OCU
+ER-OCLC-WCS-Knovel	730	|aKnovel library.|5OCU
+ER-OCLC-WCS-Referex	730	|aReferex Engineering.|5OCU
+ER-OCLC-WCS-SDebk	730	|aScienceDirect eBook Series.|5OCU
+ER-OECD-iLibrary-Bks	730	|aOECD iLibrary.|pBooks.|5OCU
+ER-OTL	730	|aOpen Textbook Library (OTL).|5OCU
+ER-PQ-EEBO	730	|aEarly English books online (PQ).|5OCU
+ER-PQDT	730	|aProQuest Dissertations & Theses.|5OCU
+ER-ProjMuse-OA	730	|aProject MUSE (Open Access).|5OCU
+ER-Rand	730	|aRand publications.|5OCU
+ER-SPIE-eBook	730	|aSPIE digital library.|pSPIE eBooks.|5OCU
+ER-SRMO	730	|aSAGE Research Methods Online.|5OCU
+ER-Sabin-Amer	730	|aSabin Americana, 1500-1926.|5OCU
+ER-SprNatureOA	730	|aSpringer Nature eBooks.|5OCU
+ER-T&F-CRC	730	|aTaylor & Francis (CRC Press).|5OCU
+ER-UAdelaide	730	|aUniversity of Adelaide Library eBooks.|5OCU
+ER-UCL-APA-PsycBOOKS	730	|aPsycBOOKS.|5OCU
+ER-UCL-OHO	730	|aOxford handbooks online.|5OCU
+ER-UCL-OHO-Classical	730	|aOxford handbooks online.|pClassical studies.|5OCU
+ER-UCL-OHO-Music	730	|aOxford handbooks online.|pMusic.|5OCU
+ER-UCL-OROP	730	|aOxford reference online (Premium).|5OCU
+ER-WBNK	730	|aWorld Bank eLibrary.|5OCU
+ER-WestAcademic	730	|aWest Academic Publishing Study Aids.|5OCU
+ER-WestlawNext	730	|aWestlawNext.|5OCU
+ER-WlK-Cheetah	730	|aWolters Kluwer.|pCheetah.|5OCU
+ER-WlK-IntelliConnect	730	|aWolters Kluwer.|pIntelliConnect.|5OCU

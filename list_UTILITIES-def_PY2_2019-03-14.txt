@@ -1,0 +1,25 @@
+def BrowseFiles():#open file explorer
+
+class utilityFunctions:
+
+    utility	def AddEresourceGMD(self, x):
+    utility	def Bcode2CheckForManuscript(self, x):
+    utility	def Bcode2CheckForSerial(self, x):
+    utility	def BrowseFiles () :
+    utility	def CharRefTrans(self, x):#Character reference translation table
+    utility	def DedupRecords(self, x):
+    utility	def DeleteLocGov(self, x):
+    utility	def MarcEditBreakFile(self, x):
+    utility	def MarcEditBreakFileTranslateToMarc8(self, x):
+    utility	def MarcEditMakeFile(self, x):
+    utility	def MarcEditSaveToMRK(self, x):
+    utility	def MarcEditXmlToMarc(self, x):
+    utility	def ScriptSelect(self):#options list
+    utility	def ScriptSelectValidate(low, high):
+    utility	def Standardize856_956(self, *args):
+    utility	def class
+    utility	def listChangeScripts(self, BatchEdits):
+    utility	def marc2Dict(self, rec):
+    utility	def marc2Recs(self, x):
+    utility	def sort007(self, x):
+    utility	def sortMarcRec(self, rec, byField='='):
