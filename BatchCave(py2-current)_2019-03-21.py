@@ -1,19 +1,11 @@
 #RLWG_BatchEdit.py
 
-import tkinter as tk
-from tkinter import filedialog
-from tkinter.filedialog import askopenfilename
-import os, subprocess, re, sys, platform, inspect
-import types, shutil
-import os
-
-
-from inspect import signature
-#MARC_lang
+from Tkinter import *
+from tkFileDialog import askopenfilename
+import os, subprocess, re, htmlentitydefs, inspect, sys, MARC_lang, platform
 from time import sleep, strftime
 
-
-print ("""________  ______   ___       ___________ 
+print """________  ______   ___       ___________ 
 ___  __ \ ___  /   __ |     / /__  ____/ 
 __  /_/ / __  /    __ | /| / / _  / __   
 _  _, _/___  /_______ |/ |/ /__/ /_/ /__ 
@@ -26,33 +18,31 @@ _  _, _/___  /_______ |/ |/ /__/ /_/ /__
 
     **** UC Libraries Record Loads Working Group ****
 
-    """)
+"""
 
 def BrowseFiles():#open file explorer
-    root=tk.Tk()
+    root=Tk()
     root.withdraw()
     filenameOUT = askopenfilename(filetypes=[("MARC files","*.mrc"),("XML files","*.xml"),("All the files","*.*")], title="R.L.W.G Batch Edit -- select input file")
-    print (type(filenameOUT))
+    print type(filenameOUT)
     filename = filenameOUT
     
     root.destroy()
-    print ('\n\nSelected file: \"' + re.sub('.*/(.*?)$', '\\1\"', filename) )
+    print '\n\nSelected file: \"' + re.sub('.*/(.*?)$', '\\1\"', filename) 
 
     return filename
 
 class utilityFunctions:
 
-
     def listChangeScripts(self, BatchEdits):
-        ScriptChangesNames = [x for x in dir(BatchEdits) if not '__' in x ]
-        #removed private functions of class since they begin with '__' and end with it
-        num = range(len(ScriptChangesNames))
-        args_dict = dict(zip(num, ScriptChangesNames))
-        ChangeScriptsDict = args_dict
-        numb = 0
+        
+        num = 0
+        ChangeScriptsDict = {}
+        for i in dir(BatchEdits)[:-2]:
+            num = num + 1
+            ChangeScriptsDict[num] = [i, ''.join(inspect.getargspec(getattr(BatchEdits, i))[3])]
         for key in ChangeScriptsDict.keys():
-            numb = numb + 1
-            print (numb, ': ' + ScriptChangesNames[key])
+            print key, ': ' + ChangeScriptsDict[key][1]
         return ChangeScriptsDict
 
     def ScriptSelect(self):#options list
@@ -61,50 +51,47 @@ class utilityFunctions:
             prompt = '\nSelect number for desired process: '
             while True:
                 try:
-                    a = int(input(prompt))
+                    a = int(raw_input(prompt))
                     if low <= a <= high:
                         return a
                     else:
-                        print('\nPlease select a number between %d and %d! ' % (low, high))
+                        print('\nPlease select a number between %d and %d!\a ' % (low, high))
                 except ValueError:
-                    print('\nPlease select a number between %d and %d! ' % (low, high))
-            return a
+                    print('\nPlease select a number between %d and %d!\a ' % (low, high))
+            return
         x = ScriptSelectValidate(1, NumberOfOptions)
-        verify = input('\nYou have selected:\n\n\t ' + ChangeScriptsDict[x-1] + '\n\nConfirm (y/n): ')
-        #must to ChangeScriptDict[x-1] because the index is one value lower than the number selected
+        verify = raw_input('\nYou have selected:\n\n\t ' + ChangeScriptsDict[x][1] + '\n\nConfirm (y/n): ')
         while verify != 'y':
             while verify != 'y' and verify != 'n':
-                verify = input('Please type \'y\' or \'n\'')
+                verify = raw_input('Please type \'y\' or \'n\'')
             if verify == 'y':
                 pass
             else:
                 x = ScriptSelectValidate(1, NumberOfOptions)
-                verify = input('\nYou have selected:\n\n\t' + str(x) + '. ' + ChangeScriptsDict[x-1] + '\n\nConfirm (y/n): ')
+                verify = raw_input('\nYou have selected:\n\n\t' + str(x) + '. ' + ChangeScriptsDict[x][1] + '\n\nConfirm (y/n): ')
         return x
-# put in function to determine system
-
 
     def MarcEditBreakFile(self, x):
         #break the file; output .mrk
-        print (x)
+        print x
         mrkFileName = re.sub('.mrc', '.mrk', x)
-        print ("\n<Breaking MARC file>\n")
-        subprocess.call(['C:\\%s\\MarcEdit 7\\cmarcedit.exe' % MarcEditDir, '-s', x, '-d', mrkFileName, '-break'])
+        print "\n<Breaking MARC file>\n"
+        subprocess.call(['C:\\%s\\MarcEdit 6\\cmarcedit.exe' % MarcEditDir, '-s', x, '-d', mrkFileName, '-break'])
         x = open(mrkFileName).read()
         return x
 
     def MarcEditBreakFileTranslateToMarc8(self, x):
         #break the file; output .mrk
-        print (x)
+        print x
         mrkFileName = re.sub('.mrc', '.mrk', x)
-        print ("\n<Breaking MARC file>\n")
-        subprocess.call(['C:\\%s\\MarcEdit 7\\cmarcedit.exe' % MarcEditDir, '-s', x, '-d', mrkFileName, '-break', '-marc8'])
+        print "\n<Breaking MARC file>\n"
+        subprocess.call(['C:\\%s\\MarcEdit 6\\cmarcedit.exe' % MarcEditDir, '-s', x, '-d', mrkFileName, '-break', '-marc8'])
         x = open(mrkFileName).read()
         return x
 
     def MarcEditMakeFile(self, x):
-        print ('\n<Compiling file to MARC>\n')
-        subprocess.call(['C:\\%s\\MarcEdit 7\\cmarcedit.exe' % MarcEditDir, '-s', filenameNoExt + '_OUT.mrk', '-d', filenameNoExt + '_OUT.mrc', '-make'])
+        print '\n<Compiling file to MARC>\n'
+        subprocess.call(['C:\\%s\\MarcEdit 6\\cmarcedit.exe' % MarcEditDir, '-s', filenameNoExt + '_OUT.mrk', '-d', filenameNoExt + '_OUT.mrc', '-make'])
         return x
     
     def MarcEditSaveToMRK(self, x):
@@ -115,20 +102,20 @@ class utilityFunctions:
     
     def MarcEditXmlToMarc(self, x):
         mrcFileName = re.sub('.xml', '.mrc', x)
-        print ('\n<Converting from XML to MARC>\n')
-        subprocess.call(['C:\\%s\\MarcEdit 7\\cmarcedit.exe' % MarcEditDir, '-s', x, '-d', mrcFileName, '-xmlmarc', '-marc8', '-mxslt', 'C:\\%s\\MarcEdit 7\\xslt\\MARC21XML2Mnemonic_plugin.xsl' % MarcEditDir])
+        print '\n<Converting from XML to MARC>\n'
+        subprocess.call(['C:\\%s\\MarcEdit 6\\cmarcedit.exe' % MarcEditDir, '-s', x, '-d', mrcFileName, '-xmlmarc', '-marc8', '-mxslt', 'C:\\%s\\MarcEdit 6\\xslt\\MARC21XML2Mnemonic_plugin.xsl' % MarcEditDir])
         return mrcFileName
-        # change this so it would work on marc edit 7 (couldn't download 6)
+
     def Standardize856_956(self, *args):
         output = []
         #Check 8/956 indicator 1 code for non http URL
         URLFieldInd1 = re.findall('=[8|9]56  [^4]..*', args[0])
         #if found, interrupt script with alert
         if URLFieldInd1:
-            print ('\a\a\nFound URL fields(s) with unexpected indicator:\n')
+            print '\a\a\nFound URL fields(s) with unexpected indicator:\n'
             for URLField in URLFieldInd1:
-                print ('\t' + URLField)
-            input('\nPress <ENTER> to continue\n')
+                print '\t' + URLField
+            raw_input('\nPress <ENTER> to continue\n')
         #split file into list of lines
         x = args[0].split('\n')
         for line in x:
@@ -444,17 +431,15 @@ class utilityFunctions:
             '&uuml;' : ['&uuml;', '{uml}u', '{232}u'],
             '&zcaron;' : ['&zcaron;', '{caron}z', '{233}z'],
             }
-
-        keys = list(CharRefTransTable)
-        # dict.key is deprecated I believe
+        
+        keys = dict.keys(CharRefTransTable)
         for key in range(len(keys)):
-            x = re.sub(keys[0], keys[1], x)
-            #this follows since we can't use dict.key
-
+            x = re.sub(CharRefTransTable[keys[key]][0], CharRefTransTable[keys[key]][1], x)
+        #Flag unknown Char Refs
         UnrecognizedCharRef = list(set(re.findall('&[\d|\w|#]*;', x)))
         if UnrecognizedCharRef:
             #sound bell
-            print ('\a\a\a\a\a\n<Found unrecognized characters>\n\n\t...generating error file\n')
+            print '\a\a\a\a\a\n<Found unrecognized characters>\n\n\t...generating error file\n'
             BoolUnrecognizedCharRef = 1
             CharRefIf = open(filename + '_UnrecognizedCharRef.txt', 'w')
             CharRefIf.write('Unrecognized character references\n')
@@ -476,9 +461,9 @@ class utilityFunctions:
     def DedupRecords(self, x):
         x = x.split('\n\n')
         x = filter(None, x)
-        print ('<Deduplicating records>\n\n\tInput Records: %s' % len(x))
+        print '<Deduplicating records>\n\n\tInput Records: %s' % len(x)
         x = list(set(x))
-        print ('\n\tOutput Records: %s' % len(x))
+        print '\n\tOutput Records: %s' % len(x)
         x.append('')
         x = "\n\n".join(x)
         return x
@@ -551,13 +536,13 @@ class utilityFunctions:
 class batchEdits:
 
     def ER_EAI_2nd(self, x, name='ER-EAI-2ND'):
-        print ('\nRunning change script '+ name + '\n')
+        print '\nRunning change script '+ name + '\n'
         #print filename
         x = utilities.MarcEditBreakFile(filename)
         # Change =001 field to =002, and add 003
         x = re.sub('(?m)^=001  (.*)', '=002  \\1\n=003  ER-EAI-2nd', x)
         # ADD local 730, 949 before supplied 008
-        x = re.sub('(?m)^=008', r'=949  \\\\$a*b3=z;bn=buint;\n=949  \\1$luint$rs$t99\n=730  0\$aEarly American imprints (Online).$nSecond series,$pShaw-Shoemaker.$5OCU\n=506  \\$aAccess restricted to users at subscribing institutions\n=008', x)
+        x = re.sub('(?m)^=008', r'=949  \\\\$a*bn=buint;b3=z;\n=949  \\1$luint$rs$t99\n=730  0\$aEarly American imprints (Online).$nSecond series,$pShaw-Shoemaker.$5OCU\n=506  \\$aAccess restricted to users at subscribing institutions\n=008', x)
         x = utilities.DeleteLocGov(x)
         x = utilities.Standardize856_956(x)
         x = utilities.CharRefTrans(x)
@@ -566,13 +551,13 @@ class batchEdits:
         return x
 
     def ER_EAI_1st(self, x, name='ER-EAI-1st'):
-        print ('\nRunning change script '+ name + '\n')
+        print '\nRunning change script '+ name + '\n'
         #print filename
         x = utilities.MarcEditBreakFile(filename)
         # Change =001 field to =002, and add 003
         x = re.sub('(?m)^=001  (.*)', '=002  \\1\n=003  ER-EAI-1st', x)
         # ADD local 730, 949 before supplied 008
-        x = re.sub('(?m)^=008', r'=949  \\\\$a*b3=z;bn=buint;\n=949  \\1$luint$rs$t99\n=730  0\$aEarly American imprints (Online).$nFirst series,$pEvans.$5OCU\n=506  \\\\$aAccess restricted to users at subscribing institutions\n=008', x)
+        x = re.sub('(?m)^=008', r'=949  \\\\$a*bn=buint;b3=z;\n=949  \\1$luint$rs$t99\n=730  0\$aEarly American imprints (Online).$nFirst series,$pEvans.$5OCU\n=506  \\\\$aAccess restricted to users at subscribing institutions\n=008', x)
         x = utilities.DeleteLocGov(x)
         x = utilities.Standardize856_956(x,'Readex')
         x = utilities.CharRefTrans(x)
@@ -581,7 +566,7 @@ class batchEdits:
         return x
 
     def ER_OECD(self, x, name='ER-OECD'):
-        print ('\nRunning change script '+ name + '\n')
+        print '\nRunning change script '+ name + '\n'
         #translate xml to MARC and break file
         x = utilities.MarcEditXmlToMarc(x)
         x = utilities.MarcEditBreakFile(x)
@@ -589,7 +574,7 @@ class batchEdits:
             # Change =001 field to =002, and add 003
             x = re.sub('(?m)^=001  (.*)', '=002  oecd_\\1\n=003  ER-OECD-iLibrary-Bks', x)
             # ADD local 730, 949 before supplied 008
-            x = re.sub('(?m)^=008', r'=949  \\\$a*b3=z;bn=buint;\n=949  \\1$luint$rs$t99\n=730  0\$aOECD iLibrary.$pBooks.$5OCU\n=300  \\\\$a1 electronic text :$bdigital PDF file\n=506  \\\\$aAccess restricted to users at subscribing institutions\n=008', x)
+            x = re.sub('(?m)^=008', r'=949  \\\$a*bn=buint;b3=z;\n=949  \\1$luint$rs$t99\n=730  0\$aOECD iLibrary.$pBooks.$5OCU\n=300  \\\\$a1 electronic text :$bdigital PDF file\n=506  \\\\$aAccess restricted to users at subscribing institutions\n=008', x)
             # 04-05-10 DELETE  lines
             x = re.sub('(?m)^=024.*\n', '', x)
             x = re.sub('(?m)^=035.*\n', '', x)
@@ -599,7 +584,7 @@ class batchEdits:
             # Change =001 field to =002, and add 003
             x = re.sub('(?m)^=001  (.*)', '=002  oecd_\\1\n=003  ER-OECD-iLibrary-Bks', x)
             # ADD local 730, 949 before supplied 008
-            x = re.sub('(?m)^=008', r'=949  \\\$a*b3=z;bn=buint;\n=949  \\1$luint$rs$t99\n=730  0\$aOECD iLibrary.$pBooks.$5OCU\n=506  \\\\$aAccess restricted to users at subscribing institutions\n=008', x)
+            x = re.sub('(?m)^=008', r'=949  \\\$a*bn=buint;b3=z;\n=949  \\1$luint$rs$t99\n=730  0\$aOECD iLibrary.$pBooks.$5OCU\n=506  \\\\$aAccess restricted to users at subscribing institutions\n=008', x)
             #change 300 to standard form
             x = re.sub('(?m)^=300.*', r'=300  \\\\$a1 electronic text :$bdigital PDF file', x)
             # 04-05-10 DELETE  lines
@@ -611,7 +596,7 @@ class batchEdits:
             # Change =001 field to =002, and add 003
             x = re.sub('(?m)^=001  (.*)', '=002  oecd_\\1\n=003  ER-OECD-iLibrary-Serials', x)
             # ADD local 730, 949 before supplied 008
-            x = re.sub('(?m)^=008', r'=949  \\\$a*b3=z;bn=buint;b2=s\n=949  \\1$luint$rs$t99\n=730  0\$aOECD iLibrary.$pSerials.$5OCU\n=506  \\\\$aAccess restricted to users at subscribing institutions\n=008', x)
+            x = re.sub('(?m)^=008', r'=949  \\\$a*bn=buint;b2=s;b3=z;\n=949  \\1$luint$rs$t99\n=730  0\$aOECD iLibrary.$pSerials.$5OCU\n=506  \\\\$aAccess restricted to users at subscribing institutions\n=008', x)
             # 04-05-10 DELETE  lines
             x = re.sub('(?m)^=024.*\n', '', x)
             x = re.sub('(?m)^=035.*\n', '', x)
@@ -648,9 +633,9 @@ class batchEdits:
         return x
 
     def ER_OCLC_WCS_SDebk(self, x, name='ER-OCLC-WCS-SDebk'):
-        print ('\nRunning change script '+ name + '\n')
+        print '\nRunning change script '+ name + '\n'
         x = utilities.MarcEditBreakFile(x)
-        x = re.sub('(?m)^=003', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*bn=buint;\n=730  0\\$aScienceDirect eBook Series.$5OCU\n=003  ER-OCLC-WCS-SDebk\n=002  OCLC-WCS-SDebk\n=003', x)
+        x = re.sub('(?m)^=003', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*bn=buint;b3=z;\n=730  0\\$aScienceDirect eBook Series.$5OCU\n=003  ER-OCLC-WCS-SDebk\n=002  OCLC-WCS-SDebk\n=003', x)
         #change 856 to 956
         x = re.sub('(?m)^=856', '=956', x)
         #add colon to 956$3
@@ -663,7 +648,7 @@ class batchEdits:
         return x
 
     def ER_NBER(self, x, name='ER-NBER'):
-        print ('\nRunning change script '+ name + '\n')
+        print '\nRunning change script '+ name + '\n'
         x = utilities.MarcEditBreakFile(filename)
         # NBER has begun using two 856 fields. DELETE 856 fields with www.nber.org ... RETAIN 856 fields with dx.doi.org 
         x = re.sub('(?m)^=856.*www.nber.org.*\n', '', x)
@@ -671,7 +656,7 @@ class batchEdits:
         #x = re.sub('(?m)^=001  (.*)', '=002  nber \\1', x)
         x = re.sub('(?m)^=001  ', '=002  nber_', x) 
         #ADD 003, 006, 007, 533, 730, 949 before supplied 008
-        x = re.sub('(?m)^=008', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*b3=z;bn=buint;\n=830  \\0$aWorking paper series (National Bureau of Economic Research : Online)\n=730  0\\$aNBER working paper series online.$5OCU\n=533  \\\\$aElectronic reproduction.$bCambridge, Mass.$cNational Bureau of Economic Research,$d200-$e1 electronic text : PDF file.$fNBER working paper series.$nAccess restricted to patrons at subscribing institutions\n=007  cr\\mnu\n=006  m\\\\\\\\\\\\\\\\d\\\\\\\\\\\\\\\\\n=003  ER-NBER\n=008', x)
+        x = re.sub('(?m)^=008', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*bn=buint;b3=z;\n=830  \\0$aWorking paper series (National Bureau of Economic Research : Online)\n=730  0\\$aNBER working paper series online.$5OCU\n=533  \\\\$aElectronic reproduction.$bCambridge, Mass.$cNational Bureau of Economic Research,$d200-$e1 electronic text : PDF file.$fNBER working paper series.$nAccess restricted to patrons at subscribing institutions\n=007  cr\\mnu\n=006  m\\\\\\\\\\\\\\\\d\\\\\\\\\\\\\\\\\n=003  ER-NBER\n=008', x)
         # 530 field, change Hardcopy to Print
         x = re.sub('(?m)^(=530.*)Hardcopy(.*)', '\\1Print\\2', x)
         # 490 and 830 fields lack ISBD punctuation, supply where lacking
@@ -688,12 +673,12 @@ class batchEdits:
         return x
 
     def ER_Emrld_BME(self, x, name='ER-Emrld-BME'):
-        print ('\nRunning change script '+ name + '\n')
+        print '\nRunning change script '+ name + '\n'
         #break the file: 
         x = utilities.MarcEditBreakFile(x)
         def Emrld_BME_changes(x):
             #insert 003, 730, 949 before supplied 003
-            x = re.sub('(?m)^=003', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*b3=z;bn=buint;\n=730  0\\$aEmerald business, management and economics ebook series.$5OCU\n=003  ER-Emrld-BME\n=003', x)
+            x = re.sub('(?m)^=003', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*bn=buint;b3=z;\n=730  0\\$aEmerald business, management and economics ebook series.$5OCU\n=003  ER-Emrld-BME\n=003', x)
             #delete selected fields
             x = re.sub('(?m)^=072.*\n', '', x)
             x = re.sub('(?m)^=365.*\n', '', x)
@@ -731,13 +716,13 @@ class batchEdits:
         return x
 
     def ER_CREDOREF(self, x, name='ER-CREDOREF'):
-        print ('\nRunning change script '+ name + '\n')
+        print '\nRunning change script '+ name + '\n'
         #break the file
         x = utilities.MarcEditBreakFile(x)
         # Change 001 to 002, Insert 003, 730, 949 before supplied 245
         x = re.sub('(?m)^=001  ', '=002  credo_', x)
         # Insert 003, 730, 949 before supplied 008
-        x = re.sub('(?m)^=008', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*b3=z;bn=buint;\n=730  0\\$aCredo reference.$5OCU\n=003  ER-CREDOREF\n=008', x)
+        x = re.sub('(?m)^=008', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*bn=buint;b3=z;\n=730  0\\$aCredo reference.$5OCU\n=003  ER-CREDOREF\n=008', x)
         #translate char references, compile to MARC and save
         x = utilities.DeleteLocGov(x)
         x = utilities.Standardize856_956(x, 'Credo reference' )
@@ -746,15 +731,15 @@ class batchEdits:
         x = utilities.MarcEditSaveToMRK(x)
         x = utilities.MarcEditMakeFile(x)
         return x
-
+    
     def ER_SprNatureOA(self, x, name='ER-SprNatureOA'):
-        print ('\nRunning change script '+ name + '\n')
+        print '\nRunning change script '+ name + '\n'
         #break the file
         x = utilities.MarcEditBreakFile(x)
         # Change 001 to 002
         x = re.sub('(?m)^=001  ', '=002  sprn_', x)
         # Insert 003, 730, 949 before supplied 008
-        x = re.sub('(?m)^=008', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*b3=z;bn=buint;\n=730  0\\$aSpringer Nature eBooks.$5OCU\n=003  ER-SprNatureOA\n=008', x)
+        x = re.sub('(?m)^=008', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*bn=buint;b3=z;\n=730  0\\$aSpringer Nature eBooks.$5OCU\n=003  ER-SprNatureOA\n=008', x)
         #translate char references, compile to MARC and save
         x = utilities.DeleteLocGov(x)
         x = utilities.Standardize856_956(x, 'SpringerLink' )
@@ -769,7 +754,7 @@ class batchEdits:
         # Change =001 field to =002, and insert our local identifier value (003)
         x = re.sub('(?m)^=001  (.*)', '=002  t&fcrc \\1\n=003  ER-T&F-CRC', x)
         # ADD 533, 730, 949 before supplied 008
-        x = re.sub('(?m)^=008', r'=949  \\\\$a*b3=z;bn=buint;\n=949  \\1$luint$rs$t99\n=730  0\\$aTaylor & Francis (CRC Press).$5OCU\n=533  \\\\$aElectronic reproduction.$bBoca Raton, Fla. :$cCRC Press.$nMode of access: World Web Web.$nSystem requirements: Adobe Acrobat Reader.$nMade available through Taylor & Francis.$nAccess restricted to users at licensed institutions\n=008', x)
+        x = re.sub('(?m)^=008', r'=949  \\\\$a*bn=buint;b3=z;\n=949  \\1$luint$rs$t99\n=730  0\\$aTaylor & Francis (CRC Press).$5OCU\n=533  \\\\$aElectronic reproduction.$bBoca Raton, Fla. :$cCRC Press.$nMode of access: World Web Web.$nSystem requirements: Adobe Acrobat Reader.$nMade available through Taylor & Francis.$nAccess restricted to users at licensed institutions\n=008', x)
         # 04-05-10 DELETE  lines 015, 016, 945
         x = re.sub('=(016|015|945).*\n', '', x)
         #remove all occurances of 999 field
@@ -784,7 +769,7 @@ class batchEdits:
         return x
 
     def CasaliniInvoiceFix(self, x, name='Casalini Invoice Fix'):
-        print ('\nRunning change script '+ name + '\n')
+        print '\nRunning change script '+ name + '\n'
         x = utilities.MarcEditBreakFile(x)
         #move $f subfield in from $a subfield
         x = re.sub('(?m)^(=980.*)(\$a.*)(\$f\d*-\d*)(.*)', '\\1\\3\\2\\4', x)
@@ -799,9 +784,9 @@ class batchEdits:
         return x
 
     def ER_OL_SPRebk(self, x, name='ER-O/L-SPRebk'):
-        print ('\nRunning change script '+ name + '\n')
+        print '\nRunning change script '+ name + '\n'
         x = utilities.MarcEditBreakFile(x)
-        x = re.sub('(?m)^=008', r'=949  \\1$lolink$rs$t99\n=949  \\\\$a*bn=bolin;\n=730  0\\$aSpringerLink\n=730  0\\$aSpringer ebooks.$5OCU\n=003  ER-O/L-SPRebk\n=002  O/L-SPRebk\n=008', x)
+        x = re.sub('(?m)^=008', r'=949  \\1$lolink$rs$t99\n=949  \\\\$a*bn=bolin;b3=z;\n=730  0\\$aSpringerLink\n=730  0\\$aSpringer ebooks.$5OCU\n=003  ER-O/L-SPRebk\n=002  O/L-SPRebk\n=008', x)
         #x = re.sub('(?m)\$3(SpringerLink|OhioLINK)\$', '$3\\1 :$', x)
         #x = re.sub('(?m)\$zConnect to resource$', '$zConnect to resource online', x)
         #x = re.sub('\$zConnect to resource \(off-campus access\)', '$zConnect to resource (Off Campus Access)', x)
@@ -815,9 +800,9 @@ class batchEdits:
         return x
 
     def ER_OL_SPRebk_GAP2010ou(self, x, name='ER-O/L-SPRebk-GAP2010ou'):
-        print ('\nRunning change script '+ name + '\n')
+        print '\nRunning change script '+ name + '\n'
         x = utilities.MarcEditBreakFile(x)
-        x = re.sub('(?m)^=008', r'=949  \\1$lolink$rs$t99\n=949  \\\\$a*bn=bolin;\n=730  0\\$aSpringerLink\n=730  0\\$aSpringer ebooks.$5OCU\n=003  ER-O/L-SPRebk-GAP2010ou\n=002  O/L-SPRebk-GAP2010ou\n=008', x)
+        x = re.sub('(?m)^=008', r'=949  \\1$lolink$rs$t99\n=949  \\\\$a*bn=bolin;b3=z;\n=730  0\\$aSpringerLink\n=730  0\\$aSpringer ebooks.$5OCU\n=003  ER-O/L-SPRebk-GAP2010ou\n=002  O/L-SPRebk-GAP2010ou\n=008', x)
         x = re.sub('\$zConnect to electronic resource \(off-campus access\)', '$zConnect to resource online (Off Campus Access)', x)
         x = re.sub('\$zConnect to electronic resource', '$zConnect to resource online', x)
         x = re.sub('\$3SpringerLink', '$3SpringerLink :', x)
@@ -828,9 +813,9 @@ class batchEdits:
         return x
 
     def ER_OL_SPRebk_GAP2011ou(self, x, name='ER-O/L-SPRebk-GAP2011ou'):
-        print ('\nRunning change script '+ name + '\n')
+        print '\nRunning change script '+ name + '\n'
         x = utilities.MarcEditBreakFile(x)
-        x = re.sub('(?m)^=008', r'=949  \\1$lolink$rs$t99\n=949  \\\\$a*bn=bolin;\n=730  0\\$aSpringerLink\n=730  0\\$aSpringer ebooks.$5OCU\n=003  ER-O/L-SPRebk-GAP2011ou\n=002  O/L-SPRebk-GAP2011ou\n=008', x)
+        x = re.sub('(?m)^=008', r'=949  \\1$lolink$rs$t99\n=949  \\\\$a*bn=bolin;b3=z;\n=730  0\\$aSpringerLink\n=730  0\\$aSpringer ebooks.$5OCU\n=003  ER-O/L-SPRebk-GAP2011ou\n=002  O/L-SPRebk-GAP2011ou\n=008', x)
         x = re.sub('\$zConnect to electronic resource \(off-campus access\)', '$zConnect to resource online (Off Campus Access)', x)
         x = re.sub('\$zConnect to electronic resource', '$zConnect to resource online', x)
         x = re.sub('\$3SpringerLink', '$3SpringerLink :', x)
@@ -842,10 +827,10 @@ class batchEdits:
         return x
 
     def ER_OL_SPRebk_OSU1(self, x, name='ER-O/L-SPRebk-OSU1'):
-        print ('\nRunning change script '+ name + '\n')
-        sequential_num = input('\n\nWhat is the number assigned to this file?')
+        print '\nRunning change script '+ name + '\n'
+        sequential_num = raw_input('\n\nWhat is the number assigned to this file?')
         x = utilities.MarcEditBreakFile(x)
-        x = re.sub('(?m)^=008', r'=949  \\1$lolink$rs$t99\n=949  \\\\$a*bn=bolin;\n=730  0\\$aSpringerLink\n=730  0\\$aSpringer ebooks.$5OCU\n=003  ER-O/L-SPRebk-OSU' + sequential_num + '\n=002  O/L-SPRebk-OSU\n=008', x)
+        x = re.sub('(?m)^=008', r'=949  \\1$lolink$rs$t99\n=949  \\\\$a*bn=bolin;b3=z;\n=730  0\\$aSpringerLink\n=730  0\\$aSpringer ebooks.$5OCU\n=003  ER-O/L-SPRebk-OSU' + sequential_num + '\n=002  O/L-SPRebk-OSU\n=008', x)
         x = re.sub('(?m)\$zConnect to resource$', '$3SpringerLink :$zConnect to resource online', x)
         x = re.sub('\$zConnect to resource \(off-campus access\)', '$3SpringerLink :$zConnect to resource online (Off Campus Access)', x)
         x = utilities.DeleteLocGov(x)
@@ -855,10 +840,10 @@ class batchEdits:
         return x
 
     def ER_OL_SPRebk_OSU2(self, x, name='ER-O/L-SPRebk-OSU2'):
-        print ('\nRunning change script '+ name + '\n')
-        sequential_num = input('\n\nWhat is the number assigned to this file?')
+        print '\nRunning change script '+ name + '\n'
+        sequential_num = raw_input('\n\nWhat is the number assigned to this file?')
         x = utilities.MarcEditBreakFile(x)
-        x = re.sub('(?m)^=008', r'=949  \\1$lolink$rs$t99\n=949  \\\\$a*bn=bolin;\n=730  0\\$aSpringerLink\n=730  0\\$aSpringer ebooks.$5OCU\n=003  ER-O/L-SPRebk-OSU' + sequential_num + '\n=002  O/L-SPRebk-OSU\n=008', x)
+        x = re.sub('(?m)^=008', r'=949  \\1$lolink$rs$t99\n=949  \\\\$a*bn=bolin;b3=z;\n=730  0\\$aSpringerLink\n=730  0\\$aSpringer ebooks.$5OCU\n=003  ER-O/L-SPRebk-OSU' + sequential_num + '\n=002  O/L-SPRebk-OSU\n=008', x)
         x = re.sub('(?m)\$3(SpringerLink|OhioLINK)\$', '$3\\1 :$', x)
         x = re.sub('(?m)\$zConnect to resource$', '$zConnect to resource online', x)
         x = re.sub('\$zConnect to resource \(off-campus access\)', '$zConnect to resource online (Off Campus Access)', x)
@@ -869,10 +854,10 @@ class batchEdits:
         return x
 
     def ER_OL_OSO(self, x, name='ER-O/L-OSO'):
-        print ('\nRunning change script '+ name + '\n')
+        print '\nRunning change script '+ name + '\n'
         x = utilities.MarcEditBreakFile(x)
         #Insert 002, 003, 730, 949 before supplied 008
-        x = re.sub('(?m)^=008', r'=949  \\1$lolink$rs$t99\n=949  \\\\$a*bn=bolin;\n=730  0\\$aOxford scholarship online.$5OCU\n=003  ER-O/L-OSO\n=002  O/L-OSO\n=008', x)
+        x = re.sub('(?m)^=008', r'=949  \\1$lolink$rs$t99\n=949  \\\\$a*bn=bolin;b3=z;\n=730  0\\$aOxford scholarship online.$5OCU\n=003  ER-O/L-OSO\n=002  O/L-OSO\n=008', x)
         #x = re.sub('\$3Oxford Scholarship Online', '', x)
         #x = re.sub('\$3OhioLINK', '', x)
         #edit proxy URLs
@@ -895,7 +880,7 @@ class batchEdits:
         return x
 
     def ER_OCLC_WCS_Knovel(self, x, name='ER-OCLC-WCS-Knovel'):
-        print ('\nRunning change script '+ name + '\n')
+        print '\nRunning change script '+ name + '\n'
         x = utilities.MarcEditBreakFile(x)
         x = re.sub('(?m)^=856.*assets.cambridge.org.*\n', '', x)
         x = re.sub('(?m)^=856.*books\.google\.com.*\n', '', x)
@@ -926,7 +911,7 @@ class batchEdits:
         x = re.sub('(?m)^=856.*www\.myilibrary\.com.*\n', '', x)
         x = re.sub('(?m)^=856.*www\.netlibrary\.com.*\n', '', x)
         #Insert 002, 003, 730, 949 before supplied 003
-        x = re.sub('(?m)^=003', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*bn=buint;\n=730  0\\$aKnovel library.$5OCU\n=003  ER-OCLC-WCS-Knovel\n=002  OCLC-WCS-Knovel\n=003', x)
+        x = re.sub('(?m)^=003', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*bn=buint;b3=z;\n=730  0\\$aKnovel library.$5OCU\n=003  ER-OCLC-WCS-Knovel\n=002  OCLC-WCS-Knovel\n=003', x)
         x = re.sub('\$3Knovel', '', x)
         #Change hyperlink tag from 856 to 956, add $3
         #x = re.sub('(?m)^=856(.*)', '=956\\1$3Knovel :', x)
@@ -941,13 +926,13 @@ class batchEdits:
         return x
 
     def ER_OCLC_WCS_ClinKey(self, x, name='ER-OCLC-WCS-ClinKey'):
-        print ('\nRunning change script '+ name + '\n')
+        print '\nRunning change script '+ name + '\n'
         x = utilities.MarcEditBreakFile(x)
         # Delete 856 fields with ... 
         x = re.sub('(?m)^=856.*www.clinicalkey.com.au.*\n', '', x)
         x = re.sub('(?m)^=856.*www.lib.umn.edu/slog.phtm.*\n', '', x)
         #Insert 002, 003, 730, 949 before supplied 003
-        x = re.sub('(?m)^=003', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*bn=buint;\n=730  0\\$aClinicalKey.$5OCU\n=003  ER-OCLC-WCS-ClinKey\n=002  OCLC-WCS-ClinKey\n=003', x)
+        x = re.sub('(?m)^=003', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*bn=buint;b3=z;\n=730  0\\$aClinicalKey.$5OCU\n=003  ER-OCLC-WCS-ClinKey\n=002  OCLC-WCS-ClinKey\n=003', x)
         x = re.sub('\$3ClinicalKey', '', x)
         x = re.sub('\$3E-Book through ClinicalKey', '', x)
         #Change hyperlink tag from 856 to 956, add $3
@@ -964,10 +949,10 @@ class batchEdits:
         return x
 
     def ER_OL_OMC_Naxos(self, x, name='ER-O/L-OMC-Naxos'):
-        print ('\nRunning change script '+ name + '\n')
+        print '\nRunning change script '+ name + '\n'
         x = utilities.MarcEditBreakFile(x)
         #Insert 002, 003, 730, 949 before supplied 008
-        x = re.sub('(?m)^=008', r'=949  \\1$lolink$rs$t99\n=949  \\\\$a*bn=bolin;\n=730  0\\$aOhioLINK Music Center.$pNaxos music library.$5OCU\n=003  ER-O/L-OMC-Naxos\n=002  O/L-OMC-Naxos\n=008', x)
+        x = re.sub('(?m)^=008', r'=949  \\1$lolink$rs$t99\n=949  \\\\$a*bn=bolin;b3=z;\n=730  0\\$aOhioLINK Music Center.$pNaxos music library.$5OCU\n=003  ER-O/L-OMC-Naxos\n=002  O/L-OMC-Naxos\n=008', x)
         #Change hyperlink tag from 856 to 956
         x = re.sub('(?m)^=856', '=956', x)
         x = utilities.DeleteLocGov(x)
@@ -978,7 +963,7 @@ class batchEdits:
         return x
 
     def MvIShipLists(self, x, name='MvI Shiplists'):
-        print ('\nRunning change script '+ name + '\n')
+        print '\nRunning change script '+ name + '\n'
         x = utilities.MarcEditBreakFile(x)
         #move 001 to 002
         x = re.sub('=001  tmp', '=002  XM tmp', x)
@@ -997,7 +982,7 @@ class batchEdits:
         return x
 
     def MvIFull(self, x, name='MvI Full'):
-        print ('\nRunning change script '+ name + '\n')
+        print '\nRunning change script '+ name + '\n'
         x = utilities.MarcEditBreakFile(x)
         def MvIEresource(x):
             #add elements to 949 and append 049 control field
@@ -1068,10 +1053,10 @@ class batchEdits:
         return x
 
     def ER_OL_ORO(self, x, name='ER-O/L-ORO'):
-        print ('\nRunning change script '+ name + '\n')
+        print '\nRunning change script '+ name + '\n'
         x = utilities.MarcEditBreakFile(x)
         #Insert 002, 003, 730, 949 before supplied 008
-        x = re.sub('(?m)^=008', r'=949  \\1$lolink$rs$t99\n=949  \\\\$a*bn=bolin;\n=003  ER-O/L-ORO\n=002  O/L-ORO\n=008', x)
+        x = re.sub('(?m)^=008', r'=949  \\1$lolink$rs$t99\n=949  \\\\$a*bn=bolin;b3=z;\n=003  ER-O/L-ORO\n=002  O/L-ORO\n=008', x)
         #Change supplied 730 lacking ending period, add .$5OCU to end of line
         x = re.sub('(?m)^(=730.*Oxford reference online\.)', '\\1$5OCU', x)
         x = re.sub('(?m)^(=730.*Oxford reference online(?!\.))', '\\1.$5OCU', x)
@@ -1083,10 +1068,10 @@ class batchEdits:
         return x
 
     def ER_OL_OR(self, x, name='ER-O/L-OR'):
-        print ('\nRunning change script '+ name + '\n')
+        print '\nRunning change script '+ name + '\n'
         x = utilities.MarcEditBreakFile(x)
         #Insert 002, 003, 730, 949 before supplied 008
-        x = re.sub('(?m)^=008', r'=949  \\1$lolink$rs$t99\n=949  \\\\$a*bn=bolin;\n=003  ER-O/L-OR\n=002  O/L-OR\n=008', x)
+        x = re.sub('(?m)^=008', r'=949  \\1$lolink$rs$t99\n=949  \\\\$a*bn=bolin;b3=z;\n=003  ER-O/L-OR\n=002  O/L-OR\n=008', x)
         #Change supplied 730 lacking ending period, add .$5OCU to end of line
         x = re.sub('(?m)^(=730.*Oxford reference\.)', '\\1$5OCU', x)
         x = re.sub('(?m)^(=730.*Oxford reference(?!\.))', '\\1.$5OCU', x)
@@ -1097,13 +1082,58 @@ class batchEdits:
         x = utilities.MarcEditMakeFile(x)
         return x
 
+    def ER_OL_databases(self, x, name='ER-O/L-databases'):
+        print '\nRunning change script '+ name + '\n'
+        x = utilities.MarcEditBreakFile(x)
+        #Insert 002, 003, 730, 949 before supplied 008
+        x = re.sub('(?m)^=008', r'=949  \\1$lolink$rs$t99\n=949  \\\\$a*bn=bolin;b3=z;\n=003  ER-O/L-databases\n=002  O/L-databases\n=008', x)
+        #Change supplied 730 lacking ending period, add .$5OCU to end of line
+        x = re.sub('(?m)^(=730.*OhioLINK research databases\.)', '\\1$5OCU', x)
+        x = re.sub('(?m)^(=730.*OhioLINK research databases(?!\.))', '\\1.$5OCU', x)
+        #x = utilities.Standardize856_956(x, '')
+        x = utilities.DeleteLocGov(x)
+        x = utilities.CharRefTrans(x)
+        x = utilities.MarcEditSaveToMRK(x)
+        x = utilities.MarcEditMakeFile(x)
+        return x
+
+    def ER_OL_ORE(self, x, name='ER-O/L-ORE'):
+        print '\nRunning change script '+ name + '\n'
+        x = utilities.MarcEditBreakFile(x)
+        #Insert 002, 003, 730, 949 before supplied 008
+        x = re.sub('(?m)^=008', r'=949  \\1$lolink$rs$t99\n=949  \\\\$a*bn=bolin;b3=z;\n=003  ER-O/L-ORE\n=002  O/L-ORE\n=008', x)
+        #Change supplied 730 lacking ending period, add .$5OCU to end of line
+        x = re.sub('(?m)^(=730.*OhioLINK research databases\.)', '\\1$5OCU', x)
+        x = re.sub('(?m)^(=730.*OhioLINK research databases(?!\.))', '\\1.$5OCU', x)
+        #x = utilities.Standardize856_956(x, '')
+        x = utilities.DeleteLocGov(x)
+        x = utilities.CharRefTrans(x)
+        x = utilities.MarcEditSaveToMRK(x)
+        x = utilities.MarcEditMakeFile(x)
+        return x
+
+    def ER_OL_OVSI(self, x, name='ER-O/L-OVSI'):
+        print '\nRunning change script '+ name + '\n'
+        x = utilities.MarcEditBreakFile(x)
+        #Insert 002, 003, 730, 949 before supplied 008
+        x = re.sub('(?m)^=008', r'=949  \\1$lolink$rs$t99\n=949  \\\\$a*bn=bolin;b3=z;\n=730  0\\$aOxford very short introductions.$5OCU\n=003  ER-O/L-OVSI\n=002  O/L-OVSI\n=008', x)
+        #Change supplied 730 lacking ending period, add .$5OCU to end of line
+        #x = re.sub('(?m)^(=730.*OhioLINK research databases\.)', '\\1$5OCU', x)
+        #x = re.sub('(?m)^(=730.*OhioLINK research databases(?!\.))', '\\1.$5OCU', x)
+        #x = utilities.Standardize856_956(x, '')
+        x = utilities.DeleteLocGov(x)
+        x = utilities.CharRefTrans(x)
+        x = utilities.MarcEditSaveToMRK(x)
+        x = utilities.MarcEditMakeFile(x)
+        return x
+
     def ER_UCL_OHO(self, x, name='ER-UCL-OHO'):
-        print ('\nRunning change script '+ name + '\n')
+        print '\nRunning change script '+ name + '\n'
         x = utilities.MarcEditBreakFile(x)
         #Change =001 field to =002, and add =003
         x = re.sub('(?m)^=001  (.*)', '=002  oxfordhandbook_\\1\n=003  ER-UCL-OHO', x)
         #ADD 730, 949 fields before supplied 008
-        x = re.sub('(?m)^=008', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*b3=z;bn=buint;\n=730  0\\$aOxford handbooks online.$5OCU\n=008', x)
+        x = re.sub('(?m)^=008', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*bn=buint;b3=z;\n=730  0\\$aOxford handbooks online.$5OCU\n=008', x)
         x = utilities.Standardize856_956(x, 'Oxford handbooks online')
         x = utilities.AddEresourceGMD(x)
         x = utilities.DeleteLocGov(x)
@@ -1113,12 +1143,12 @@ class batchEdits:
         return x
 
     def ER_UCL_OHO_Classical(self, x, name='ER-UCL-OHO-Classical'):
-        print ('\nRunning change script '+ name + '\n')
+        print '\nRunning change script '+ name + '\n'
         x = utilities.MarcEditBreakFile(x)
         #Change =001 field to =002, and add =003
         x = re.sub('(?m)^=001  (.*)', '=002  oxfordhandbook_\\1\n=003  ER-UCL-OHO-Classical', x)
         #ADD 730, 949 fields before supplied 008
-        x = re.sub('(?m)^=008', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*b3=z;bn=buint;\n=730  0\\$aOxford handbooks online.$pClassical studies.$5OCU\n=008', x)
+        x = re.sub('(?m)^=008', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*bn=buint;b3=z;\n=730  0\\$aOxford handbooks online.$pClassical studies.$5OCU\n=008', x)
         x = utilities.Standardize856_956(x,)
         x = utilities.AddEresourceGMD(x)
         x = utilities.DeleteLocGov(x)
@@ -1128,12 +1158,12 @@ class batchEdits:
         return x
 
     def ER_UCL_OHO_Music(self, x, name='ER-UCL-OHO-Music'):
-        print ('\nRunning change script '+ name + '\n')
+        print '\nRunning change script '+ name + '\n'
         x = utilities.MarcEditBreakFile(x)
         #Change =001 field to =002, and add =003
         x = re.sub('(?m)^=001  (.*)', '=002  oxfordhandbook_\\1\n=003  ER-UCL-OHO-Music', x)
         #ADD 730, 949 fields before supplied 008
-        x = re.sub('(?m)^=008', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*b3=z;bn=buint;\n=730  0\\$aOxford handbooks online.$pMusic.$5OCU\n=008', x)
+        x = re.sub('(?m)^=008', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*bn=buint;b3=z;\n=730  0\\$aOxford handbooks online.$pMusic.$5OCU\n=008', x)
         x = utilities.Standardize856_956(x, 'Oxford handbooks online')
         x = utilities.AddEresourceGMD(x)
         x = utilities.DeleteLocGov(x)
@@ -1143,12 +1173,12 @@ class batchEdits:
         return x
 
     def ER_UCL_OROP(self, x, name='ER-UCL-OROP'):
-        print ('\nRunning change script '+ name + '\n')
+        print '\nRunning change script '+ name + '\n'
         x = utilities.MarcEditBreakFile(x)
         #Change =001 field to =002, and add =003
         x = re.sub('(?m)^=001  (.*)', '=002  orop_\\1\n=003  ER-UCL-OROP', x)
         #ADD 730, 949 fields before supplied 008
-        x = re.sub('(?m)^=008', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*b3=z;bn=buint;\n=730  0\\$aOxford reference online (Premium).$5OCU\n=008', x)
+        x = re.sub('(?m)^=008', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*bn=buint;b3=z;\n=730  0\\$aOxford reference online (Premium).$5OCU\n=008', x)
         x = utilities.Standardize856_956(x, 'Oxford reference online (UCL)')
         x = utilities.AddEresourceGMD(x)
         x = utilities.DeleteLocGov(x)
@@ -1158,37 +1188,24 @@ class batchEdits:
         return x
 
     def ER_OL_Safari(self, x, name='ER-O/L-Safari'):
-        print ('\nRunning change script '+ name + '\n')
+        print '\nRunning change script '+ name + '\n'
         x = utilities.MarcEditBreakFile(x)
-        x = re.sub('(?m)^=856.*EBSCOhost.*\n', '', x)
-        x = re.sub('(?m)^=856.*OhioLINK.*\n', '', x)
-        x = re.sub('(?m)^=856.*SpringerLink.*\n', '', x)
-        x = re.sub('(?m)^=856.*Wiley.*\n', '', x)
         #Insert 002, 003, 730, 949 before supplied 008
-        x = re.sub('(?m)^=008', r'=949  \\1$lolink$rs$t99\n=949  \\\\$a*b3=z;bn=bolin;\n=730  0\\$aSafari books online.$5OCU\n=003  ER-O/L-Safari\n=002  O/L-Safari\n=008', x)
-        x = re.sub('\$3Safari Books Online', '', x)
-        #edit proxy URLs
-        #x = re.sub('\$zConnect to resource', '$3Safari (ProQuest) :$zConnect to resource', x)
-        #x = re.sub('\(off-campus access\)', '(Off Campus Access)', x)
-        #x = re.sub('\(off-campus\)', '(Off Campus Access)', x)
-        #x = re.sub('\$zConnect to this resource online', '$3Safari (ProQuest) :$zConnect to resource online', x)
-        #x = re.sub('\(off-campus access\)', '(Off Campus Access)', x)
-        #x = re.sub('\$zConnect to electronic resource', '$3Safari(ProQuest) :$zConnect to resource online', x)
-        #Change hyperlink tag from 856 to 956
-        #x = re.sub('(?m)^=856', '=956', x)
-        #x = utilities.Standardize856_956(x, )
-        x = utilities.AddEresourceGMD(x)
+        x = re.sub('(?m)^=008', r'=949  \\1$lolink$rs$t99\n=949  \\\\$a*bn=bolin;b3=z;\n=730  0\\$aSafari books online.$5OCU\n=003  ER-O/L-Safari\n=002  O/L-Safari\n=008', x)
         x = utilities.DeleteLocGov(x)
+        x = utilities.AddEresourceGMD(x)
+        x = utilities.Standardize856_956(x, 'Authorized UC users must set up an account with valid UC email')
+        x = utilities.sort007(x)
         x = utilities.CharRefTrans(x)
         x = utilities.MarcEditSaveToMRK(x)
         x = utilities.MarcEditMakeFile(x)
         return x
 
     def ER_OL_Sage_eRef(self, x, name='ER-O/L-Sage-eRef'):
-        print ('\nRunning change script '+ name + '\n')
+        print '\nRunning change script '+ name + '\n'
         x = utilities.MarcEditBreakFile(x)
         #Insert 002, 003, 730, 949 before supplied 003 
-        x = re.sub('(?m)^=003', r'=949  \\1$lolink$rs$t99\n=949  \\\\$a*bn=bolin;\n=730  0\\$aSage eReference.$5OCU\n=003  ER-O/L-Sage-eRef\n=002  O/L-Sage-eRef\n=003', x)
+        x = re.sub('(?m)^=003', r'=949  \\1$lolink$rs$t99\n=949  \\\\$a*bn=bolin;b3=z;\n=730  0\\$aSage eReference.$5OCU\n=003  ER-O/L-Sage-eRef\n=002  O/L-Sage-eRef\n=003', x)
         #x = utilities.Standardize856_956(x, 'SAGE Reference Online')
         x = utilities.DeleteLocGov(x)
         x = utilities.CharRefTrans(x)
@@ -1197,9 +1214,9 @@ class batchEdits:
         return x
 
     def ER_OL_GVRL(self, x, name='ER-O/L-GVRL'):
-        print ('\nRunning change script '+ name + '\n')
+        print '\nRunning change script '+ name + '\n'
         x = utilities.MarcEditBreakFile(x)
-        x = re.sub('(?m)^=003', r'=949  \\1$lolink$rs$t99\n=949  \\\\$a*bn=bolin;\n=730  0\\$aGale virtual reference library (Online).$5OCU\n=730  0\\$aGVRL.$5OCU\n=003  ER-O/L-GVRL\n=002  O/L-GVRL\n=003', x)
+        x = re.sub('(?m)^=003', r'=949  \\1$lolink$rs$t99\n=949  \\\\$a*bn=bolin;b3=z;\n=730  0\\$aGale virtual reference library (Online).$5OCU\n=730  0\\$aGVRL.$5OCU\n=003  ER-O/L-GVRL\n=002  O/L-GVRL\n=003', x)
         #x = utilities.Standardize856_956(x, 'OhioLINK EBC')
         x = utilities.DeleteLocGov(x)
         x = utilities.CharRefTrans(x)
@@ -1208,10 +1225,10 @@ class batchEdits:
         return x
 
     def ER_OL_ABC_Clio(self, x, name='ER-O/L-ABC-Clio'):
-        print ('\nRunning change script '+ name + '\n')
+        print '\nRunning change script '+ name + '\n'
         x = utilities.MarcEditBreakFile(x)
         #Insert 002, 003, 730, 949 before supplied 003
-        x = re.sub('(?m)^=003', r'=949  \\1$lolink$rs$t99\n=949  \\\\$a*bn=bolin;\n=730  0\\$aABC-Clio E-Books.$5OCU\n=003  ER-O/L-ABC-Clio\n=002  O/L-ABC-Clio\n=003', x)
+        x = re.sub('(?m)^=003', r'=949  \\1$lolink$rs$t99\n=949  \\\\$a*bn=bolin;b3=z;\n=730  0\\$aABC-Clio E-Books.$5OCU\n=003  ER-O/L-ABC-Clio\n=002  O/L-ABC-Clio\n=003', x)
         #x = utilities.Standardize856_956(x, 'OhioLINK')
         x = utilities.DeleteLocGov(x)
         x = utilities.CharRefTrans(x)
@@ -1220,9 +1237,9 @@ class batchEdits:
         return x
 
     def ER_OL_ODRS(self, x, name='ER-O/L-ODRS'):
-        print ('\nRunning change script '+ name + '\n')
+        print '\nRunning change script '+ name + '\n'
         x = utilities.MarcEditBreakFile(x)
-        x = re.sub('(?m)^=003', r'=949  \\1$lolink$rs$t99\n=949  \\\\$a*bn=bolin;\n=730  0\\$aOxford Digital Reference Shelf.$5OCU\n=002  O/L-ODRS\n=003  ER-O/L-ODRS\n=730  0\\$aODRS.$5OCU\n=003', x)
+        x = re.sub('(?m)^=003', r'=949  \\1$lolink$rs$t99\n=949  \\\\$a*bn=bolin;b3=z;\n=730  0\\$aOxford Digital Reference Shelf.$5OCU\n=002  O/L-ODRS\n=003  ER-O/L-ODRS\n=730  0\\$aODRS.$5OCU\n=003', x)
         #x = utilities.Standardize856_956(x, 'OhioLINK EBC')
         x = utilities.DeleteLocGov(x)
         x = utilities.CharRefTrans(x)
@@ -1231,7 +1248,7 @@ class batchEdits:
         return x
 
     def ER_InfoSci(self, x, name='ER-InfoSci'):
-        print ('\nRunning change script '+ name + '\n')
+        print '\nRunning change script '+ name + '\n'
         x = utilities.MarcEditBreakFile(x)
         #DELETE a number of fields, not all fields occur in every record
         x = re.sub('(?m)^(=035|=040|=042|=050|=082|=590|=906|=925|=936|=952|=955|=963).*\n', '', x)
@@ -1239,7 +1256,7 @@ class batchEdits:
         #x = re.sub('(?m)^=001  (.*)', '=002  infosci_\\1', x)
         x = re.sub('(?m)^=001  ', '=002  infosci_', x)
         #ADD 003, 730, 949 before supplied 008
-        x = re.sub('(?m)^=008', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*b3=z;bn=buint;\n=730  0\\$aIGI Global Research Collection.$pInfoSci.$5OCU\n=730  0\\$aInfoSci\n=003  ER-InfoSci\n=008', x)
+        x = re.sub('(?m)^=008', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*bn=buint;b3=z;\n=730  0\\$aIGI Global Research Collection.$pInfoSci.$5OCU\n=730  0\\$aInfoSci\n=003  ER-InfoSci\n=008', x)
         #remove delim 3s
         x = re.sub('\$3Chapter PDFs via platform:', '', x)
         x = re.sub('\$3Article PDFs via platform:', '', x)
@@ -1249,7 +1266,7 @@ class batchEdits:
         monos = []
         for record in x:
             if re.search('=022', record):
-                record = re.sub('=949.*\$a\*b3=z;bn=buint;', r'=949  \\\\$a*b3=z;bn=buint;b2=s;', record)
+                record = re.sub('=949.*\$a\*bn=buint;b3=z;', r'=949  \\\\$a*bn=buint;b2=s;b3=z;', record)
                 serials.append(record)
             else:
                 monos.append(record)
@@ -1267,7 +1284,7 @@ class batchEdits:
         return x
 
     def ER_ICE_virtual_lib(self, x, name='ER-ICE-virtual-lib'):
-        print ('\nRunning change script '+ name + '\n')
+        print '\nRunning change script '+ name + '\n'
         x = utilities.MarcEditBreakFile(x)
         #DELETE a number of fields, not all fields occur in every record
         #x = re.sub('(?m)^(=001|=035|=040|=042|=050|=082|=590|=906|=925|=936|=952|=955|=963).*\n', '', x)
@@ -1275,7 +1292,7 @@ class batchEdits:
         #x = re.sub('(?m)^=001  (.*)', '=002  icevl_\\1', x)
         x = re.sub('(?m)^=001  ', '=002  icevl_', x)
         #ADD 003, 730, 949 before supplied 008
-        x = re.sub('(?m)^=008', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*b3=z;bn=buint;\n=710  2\\$aInstitution of Civil Engineers (Great Britain)\n=730  0\\$aICE virtual library.$5OCU\n=003  ER-ICE-virtual-lib\n=008', x)
+        x = re.sub('(?m)^=008', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*bn=buint;b3=z;\n=710  2\\$aInstitution of Civil Engineers (Great Britain)\n=730  0\\$aICE virtual library.$5OCU\n=003  ER-ICE-virtual-lib\n=008', x)
         #remove delim 3s   ICE virtual library
         x = re.sub('\$3ICE virtual library', '', x)
         x = utilities.AddEresourceGMD(x)
@@ -1287,14 +1304,14 @@ class batchEdits:
         return x
 
     def ER_YBP_DDA_disc(self, x, name='ER-YBP-DDA-disc'):
-        print ('\nRunning change script '+ name + '\n')
+        print '\nRunning change script '+ name + '\n'
         x = utilities.MarcEditBreakFile(x)
         #change 001 field tag to 002
         x = re.sub('(?m)^=001', r'=002', x)
         #change 035 field tag to 037
         x = re.sub('(?m)^=035', r'=037', x)
         #add 003 and 949 command fields before supplied 008
-        x = re.sub('(?m)^=008', r'=003  ER-YBP-DDA-disc\n=949  \\\\$a*b3=z;bn=buint;\n=949  \\1$luint$rs$t99\n=008', x)
+        x = re.sub('(?m)^=008', r'=003  ER-YBP-DDA-disc\n=949  \\\\$a*bn=buint;b3=z;\n=949  \\1$luint$rs$t99\n=008', x)
         x = utilities.DeleteLocGov(x)
         x = utilities.CharRefTrans(x)
         x = utilities.AddEresourceGMD(x)
@@ -1303,7 +1320,7 @@ class batchEdits:
         return x
 
     def ER_Sabin_Amer(self, x, name='ER-Sabin-Amer'):
-        print ('\nRunning change script '+ name + '\n')
+        print '\nRunning change script '+ name + '\n'
         x = utilities.MarcEditBreakFile(x)
         #Change =001 to =002
         x = re.sub('(?m)^=001', r'=002', x)
@@ -1321,7 +1338,7 @@ class batchEdits:
         return x
 
     def ER_NCCO(self, x, name='ER-NCCO'):
-        print ('\nRunning change script '+ name + '\n')
+        print '\nRunning change script '+ name + '\n'
         x = utilities.MarcEditBreakFile(x)
         #Change =001 to =002
         x = re.sub('(?m)^=001', r'=002', x)
@@ -1343,10 +1360,10 @@ class batchEdits:
         return x
 
     def ER_OL_Ambrose_videos(self, x, name='ER-O/L-Ambrose-videos'):
-        print ('\nRunning change script '+ name + '\n')
+        print '\nRunning change script '+ name + '\n'
         x = utilities.MarcEditBreakFile(x)
         #Insert 002, 003, 730, 949 before supplied 003
-        x = re.sub('(?m)^=003', r'=949  \\1$lolink$rs$t99\n=949  \\\\$a*bn=bolin;\n=730  0\\$aAmbrose videos.$OCU\n=003  ER-O/L-Ambrose videos\n=002  O/L-Ambrose\n=003', x)
+        x = re.sub('(?m)^=003', r'=949  \\1$lolink$rs$t99\n=949  \\\\$a*bn=bolin;b3=z;\n=730  0\\$aAmbrose videos.$OCU\n=003  ER-O/L-Ambrose videos\n=002  O/L-Ambrose\n=003', x)
         #x = utilities.Standardize856_956(x, 'OhioLINK DMC')
         x = utilities.DeleteLocGov(x)
         x = utilities.CharRefTrans(x)
@@ -1355,7 +1372,7 @@ class batchEdits:
         return x
 
     def ER_OCLC_WCS_IEEE_Xplore(self, x, name='ER-OCLC-WCS-IEEE-Xplore'):
-        print ('\nRunning change script '+ name + '\n')
+        print '\nRunning change script '+ name + '\n'
         x = utilities.MarcEditBreakFile(x)
         # delete extraneous fields
         x = re.sub('(?m)^=938.*\n', '', x)
@@ -1375,7 +1392,7 @@ class batchEdits:
         x = re.sub('(?m)^=856.*public\.eblib\.com.*\n', '', x)
         x = re.sub('(?m)^=856.*www\.contentreserve\.com.*\n', '', x)
         #Insert 002, 003, 730, 949 before supplied 003
-        x = re.sub('(?m)^=003', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*bn=buint;\n=730  0\\$aIEEE Xplore digital library.$5OCU\n=003  ER-OCLC-WCS-IEEE-Xplore\n=002  OCLC-WCS-IEEE-Xplore\n=003', x)
+        x = re.sub('(?m)^=003', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*bn=buint;b3=z;\n=730  0\\$aIEEE Xplore digital library.$5OCU\n=003  ER-OCLC-WCS-IEEE-Xplore\n=002  OCLC-WCS-IEEE-Xplore\n=003', x)
         # Change hyperlink tag from 856 to 956
         x = re.sub('(?m)^=856', '=956', x)
         x = utilities.Standardize856_956(x, 'IEEE Xplore')
@@ -1386,11 +1403,11 @@ class batchEdits:
         return x
 
     def ER_OL_FFHS(self, x, name='ER-O/L-FFSH'):
-        print ('\nRunning change script '+ name + '\n')
+        print '\nRunning change script '+ name + '\n'
         #break the MARC file
         x = utilities.MarcEditBreakFile(x)
         # Insert 002, 003, 730, 949 before supplied 003
-        x = re.sub('(?m)^=003', r'=949  \\1$lolink$rs$t99\n=949  \\\\$a*bn=bolin;\n=730  0\\$aFilms for the Humanities \& Sciences\n=003  ER-O/L-FFHS\n=002  O/L-FFHS\n=003', x)
+        x = re.sub('(?m)^=003', r'=949  \\1$lolink$rs$t99\n=949  \\\\$a*bn=bolin;b3=z;\n=730  0\\$aFilms for the Humanities \& Sciences\n=003  ER-O/L-FFHS\n=002  O/L-FFHS\n=003', x)
         #change 856 to 956
         x = re.sub('(?m)^=856', '=956', x)
         #standard link field, delete TOCs, translate char references, make and save file
@@ -1407,7 +1424,7 @@ class batchEdits:
         #change 001 to 002
         x = re.sub('(?m)^=001  ', '=002  wbnk_', x)
         #ADD 003, 730, 949 before supplied 008
-        x = re.sub('(?m)^=008', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*b3=z;bn=buint;\n=730  0\\$aWorld Bank eLibrary.$5OCU\n=003  ER-WBNK\n=008', x)
+        x = re.sub('(?m)^=008', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*bn=buint;b3=z;\n=730  0\\$aWorld Bank eLibrary.$5OCU\n=003  ER-WBNK\n=008', x)
         #Delete space between indicators and subfield delimeter
         x = re.sub('=776  18 \$a', r'=776  18$a', x)
         # add access note to 533 field
@@ -1425,7 +1442,7 @@ class batchEdits:
         #break the MARC file
         x = utilities.MarcEditBreakFile(x)
         # Insert 002, 003, 730, 949 before supplied 008
-        x = re.sub('(?m)^=008', r'=949  \\1$lolink$rs$t99\n=949  \\\\$a*bn=bolin;b3=z;\n=730  0\\$aHistory E-Book project.$5OCU\n=730  0\\$aACLS History E-Books.$5OCU\n=003  ER-O/L-ACLS\n=002  O/L-ACLS\n=008', x)
+        x = re.sub('(?m)^=008', r'=949  \\1$lolink$rs$t99\n=949  \\\\$a*bn=bolin;b3=z;\n=730  0\\$aHistory E-Book project\n=730  0\\$aACLS History E-Books.$5OCU\n=003  ER-O/L-ACLS\n=002  O/L-ACLS\n=008', x)
         #Delete TOC URLs
         x = utilities.DeleteLocGov(x)
         # Change hyperlink tag from 856 to 956
@@ -1605,11 +1622,11 @@ class batchEdits:
         return x
 
     def ER_OL_Wiley(self, x, name='ER-O/L-Wiley-InterSci'):
-        print ('\nRunning change script '+ name + '\n')
+        print '\nRunning change script '+ name + '\n'
         #breaktheMARCfile
         x = utilities.MarcEditBreakFile(x)
         #Insert 002, 003, 730, 949 before supplied 008
-        x = re.sub('(?m)^=008', r'=949  \\1$lolink$rs$t99\n=949  \\\\$a*bn=bolin;\n=003  ER-O/L-Wiley-InterSci\n=002  O/L-Wiley-InterSci\n=730  0\\$aWiley online library.$5OCU\n=730  0\\$aWiley InterScience ebooks\n=008', x)
+        x = re.sub('(?m)^=008', r'=949  \\1$lolink$rs$t99\n=949  \\\\$a*bn=bolin;b3=z;\n=003  ER-O/L-Wiley\n=002  O/L-Wiley\n=730  0\\$aWiley online library.$5OCU\n=008', x)
         #x = re.sub('\$3Wiley Books Online', '', x)
         #edit proxy URLs
         #x = re.sub('(?m)^=856  40\$3Wiley Online Library', '=856  40$3Wiley Online Library :', x)
@@ -1627,11 +1644,11 @@ class batchEdits:
         return x
 
     def ER_OL_IOP(self, x, name='ER-O/L-IOP'):
-        print ('\nRunning change script '+ name + '\n')
+        print '\nRunning change script '+ name + '\n'
         #breaktheMARCfile
         x = utilities.MarcEditBreakFile(x)
         #Insert 002, 003, 730, 949 before supplied 008
-        x = re.sub('(?m)^=008', r'=949  \\1$lolink$rs$t99\n=949  \\\\$a*bn=bolin;\n=003  ER-O/L-IOP\n=002  O/L-IOP\n=730  0\\$aInstitute of Physics ebooks.$5OCU\n=730  0\\$aIOP ebooks.$5OCU\n=008', x)
+        x = re.sub('(?m)^=008', r'=949  \\1$lolink$rs$t99\n=949  \\\\$a*bn=bolin;b3=z;\n=003  ER-O/L-IOP\n=002  O/L-IOP\n=730  0\\$aInstitute of Physics ebooks.$5OCU\n=730  0\\$aIOP ebooks.$5OCU\n=008', x)
         #x = re.sub('\$3IOP ebooks','', x)
         #edit proxy URLs
         #x = re.sub('(?m)^=856  40\$3IOP ebooks', '=856  40$3IOP ebooks :', x)
@@ -1648,11 +1665,11 @@ class batchEdits:
         return x
 
     def ER_OL_UPSO(self, x, name='ER-O/L-UPSO'):
-        print ('\nRunning change script '+ name + '\n')
+        print '\nRunning change script '+ name + '\n'
         #breaktheMARCfile
         x = utilities.MarcEditBreakFile(x)
         #Insert 002, 003, 730, 949 before supplied 008
-        x = re.sub('(?m)^=008', r'=949  \\1$lolink$rs$t99\n=949  \\\\$a*bn=bolin;\n=003  ER-O/L-UPSO\n=002  O/L-UPSO\n=730  0\\$aUniversity Press Scholarship Online.$5OCU\n=008', x)
+        x = re.sub('(?m)^=008', r'=949  \\1$lolink$rs$t99\n=949  \\\\$a*bn=bolin;b3=z;\n=003  ER-O/L-UPSO\n=002  O/L-UPSO\n=730  0\\$aUniversity Press Scholarship Online.$5OCU\n=008', x)
         #x = re.sub('\$3University Press Scholarship Online','', x)
         #edit proxy URLs
         #x = re.sub('(?m)\$zConnect to resource$', '$zConnect to resource online', x)
@@ -1668,11 +1685,11 @@ class batchEdits:
         return x
 
     def ER_OL_Cambridge(self, x, name='ER-O/L-Cambridge'):
-        print ('\nRunning change script '+ name + '\n')
+        print '\nRunning change script '+ name + '\n'
         #breaktheMARCfile
         x = utilities.MarcEditBreakFile(x)
         #Insert 002, 003, 730, 949 before supplied 008
-        x = re.sub('(?m)^=008', r'=949  \\1$lolink$rs$t99\n=949  \\\\$a*bn=bolin;\n=003  ER-O/L-Cambridge\n=002  O/L-Cambridge\n=730  0\\$aCambridge Books Online.$5OCU\n=008', x)
+        x = re.sub('(?m)^=008', r'=949  \\1$lolink$rs$t99\n=949  \\\\$a*bn=bolin;b3=z;\n=003  ER-O/L-Cambridge\n=002  O/L-Cambridge\n=730  0\\$aCambridge Books Online.$5OCU\n=008', x)
         #x = re.sub('\$3Cambridge Books Online', '', x)
         #edit proxy URLs
         #x = re.sub('(?m)\$zConnect to resource$', '$zConnect to resource online', x)
@@ -1688,11 +1705,11 @@ class batchEdits:
         return x
 
     def ER_OL_APA_Books(self, x, name='ER-O/L-APA Books'):
-        print ('\nRunning change script '+ name + '\n')
+        print '\nRunning change script '+ name + '\n'
         #breaktheMARCfile
         x = utilities.MarcEditBreakFile(x)
         #Insert 002, 003, 730, 949 before supplied 008
-        x = re.sub('(?m)^=008', r'=949  \\1$lolink$rs$t99\n=949  \\\\$a*bn=bolin;\n=003  ER-O/L-APA Books\n=002  O/L-APA Books\n=730  0\\$aAPA Books.$5OCU\n=008', x)
+        x = re.sub('(?m)^=008', r'=949  \\1$lolink$rs$t99\n=949  \\\\$a*bn=bolin;b3=z;\n=003  ER-O/L-APA Books\n=002  O/L-APA Books\n=730  0\\$aAPA Books.$5OCU\n=008', x)
         #x = re.sub('\$3APA Books', '', x)
         #edit proxy URLs
         #x = re.sub('(?m)\$zConnect to resource$', '$zConnect to resource online', x)
@@ -1708,12 +1725,12 @@ class batchEdits:
         return x
 
     def ER_UCL_APA_PsycBOOKS(self, x, name='ER-UCL-APA-PsycBOOKS'):
-        print ('\nRunning change script '+ name + '\n')
+        print '\nRunning change script '+ name + '\n'
         x = utilities.MarcEditBreakFile(filename)
         #change 001 to 002, retain first letter and insert initial code
         x = re.sub('(?m)^=001  ', '=002  Psycbook_', x)
         #ADD 003, 730, 949 before supplied 008
-        x = re.sub('(?m)^=040', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*b3=z;bn=buint;\n=730  0\\$aPsycBOOKS.$5OCU\n=003  ER-UCL-APA-PsycBOOKS\n=040', x)
+        x = re.sub('(?m)^=040', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*bn=buint;b3=z;\n=730  0\\$aPsycBOOKS.$5OCU\n=003  ER-UCL-APA-PsycBOOKS\n=040', x)
         # 2017-01-14 DELETE  lines
         x = re.sub('(?m)^=912.*\n', '', x)
         #remove Table of contents URLs
@@ -1755,7 +1772,7 @@ class batchEdits:
         #change 001 to 002
         x = re.sub('(?m)^=001', '=002', x)
         #ADD 002, 003, 730, before supplied 008
-        x = re.sub('(?m)^=008', r'=949  \\\\$a*b3=z;bn=buint;\n=730  0\\$aProQuest U.S. serial set digital collection.$5OCU\n=003  ER-LN-SSDC-2\n=002  LN-SSDC-2\n=008', x)
+        x = re.sub('(?m)^=008', r'=949  \\\\$a*bn=buint;b3=z;\n=730  0\\$aProQuest U.S. serial set digital collection.$5OCU\n=003  ER-LN-SSDC-2\n=002  LN-SSDC-2\n=008', x)
         x = x.split('\n\n')
         #create empty lists for sorting
         Has086 = []
@@ -1807,7 +1824,7 @@ class batchEdits:
         #change 001 to 002
         x = re.sub('(?m)^=001', '=002', x)
         #ADD 002, 003, 730, before supplied 008
-        x = re.sub('(?m)^=008', r'=949  \\\\$a*b3=z;bn=buint;\n=730  0\\$aProQuest U.S. serial set digital collection.$5OCU\n=003  ER-PQ-SSDC\n=002  PQ-SSDC\n=008', x)
+        x = re.sub('(?m)^=008', r'=949  \\\\$a*bn=buint;b3=z;\n=730  0\\$aProQuest U.S. serial set digital collection.$5OCU\n=003  ER-PQ-SSDC\n=002  PQ-SSDC\n=008', x)
         x = x.split('\n\n')
         #create empty lists for sorting
         Has086 = []
@@ -1859,7 +1876,7 @@ class batchEdits:
         #change 001 to 002
         x = re.sub('(?m)^=001', '=002', x)
         #ADD 002, 003, 730, before supplied 008
-        x = re.sub('(?m)^=008', r'=949  \\\\$a*b3=z;bn=buint;\n=730  0\\$aProQuest Congressional Hearings digital collection.$5OCU\n=003  ER-PQ-CHDC\n=002  PQ-CHDC\n=008', x)
+        x = re.sub('(?m)^=008', r'=949  \\\\$a*bn=buint;b3=z;\n=730  0\\$aProQuest Congressional Hearings digital collection.$5OCU\n=003  ER-PQ-CHDC\n=002  PQ-CHDC\n=008', x)
         x = x.split('\n\n')
         #create empty lists for sorting
         Has086 = []
@@ -1885,14 +1902,14 @@ class batchEdits:
         return x
 
     def ER_SPIEeBookREV(self, x, name='ER-SPIE-eBook-revised'):
-        print ('\nRunning change script '+ name + '\n')
+        print '\nRunning change script '+ name + '\n'
         x = utilities.MarcEditBreakFile(x)
         #DELETE a number of fields, not all fields occur in every record
         x = re.sub('(?m)^(=035|=040|=042|=050|=082|=590|=906|=925|=936|=952|=955|=963).*\n', '', x)
         #Change =001 field to =002, and add =003
         x = re.sub('(?m)^=001  (.*)', '=002  spie_\\1\n=003  ER-SPIE-eBook', x)
         #ADD 730, 949 fields before supplied 008
-        x = re.sub('(?m)^=008', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*b3=z;bn=buint;\n=730  0\\$aSPIE digital library.$pSPIE eBooks.$5OCU\n=008', x)
+        x = re.sub('(?m)^=008', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*bn=buint;b3=z;\n=730  0\\$aSPIE digital library.$pSPIE eBooks.$5OCU\n=008', x)
         x = utilities.Standardize856_956(x, 'SPIE digital library')
         x = utilities.DeleteLocGov(x)
         x = utilities.CharRefTrans(x)
@@ -1901,19 +1918,41 @@ class batchEdits:
         return x
 
     def ER_MOMW_2(self, x, name='ER-MOMW-2'):
-        print ('\nRunning change script '+ name + '\n')
+        print '\nRunning change script '+ name + '\n'
         x = utilities.MarcEditBreakFile(x)
         #DELETE a number of fields, not all fields occur in every record
         x = re.sub('(?m)^(=035|=040|=042|=050|=082|=590|=906|=925|=936|=952|=955|=963).*\n', '', x)
         #CHANGE 001 to 002
         x = re.sub('(?m)^=001', '=002', x)
         #ADD 002, 003, 730, 949 before supplied 008
-        x = re.sub('(?m)^=008', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*b3=z;bn=buint;\n=730  0\\$aMaking of the modern world (Online).$5OCU\n=003  ER-MOMW-2\n=002  MOMW-2\n=008', x)
+        x = re.sub('(?m)^=008', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*bn=buint;b3=z;\n=730  0\\$aMaking of the modern world (Online).$5OCU\n=003  ER-MOMW-2\n=002  MOMW-2\n=008', x)
         #ADD subfield delimiter to series
         x = re.sub('(=[490|830].*?) (Part.*)', '\\1$n\\2', x) 
         #CHANGE indicators on URL
         x = re.sub('=856  ..', '=856  40', x)
         x = utilities.Standardize856_956(x)
+        x = utilities.DeleteLocGov(x)
+        x = utilities.AddEresourceGMD(x)
+        x = utilities.CharRefTrans(x)
+        x = utilities.MarcEditSaveToMRK(x)
+        x = utilities.MarcEditMakeFile(x)
+        return x
+
+    def ER_MOMW_3(self, x, name='ER-MOMW-3'):
+        print '\nRunning change script '+ name + '\n'
+        x = utilities.MarcEditBreakFile(x)
+        #DELETE a number of fields, not all fields occur in every record
+        x = re.sub('(?m)^(=035|=040|=042|=050|=082|=590|=906|=925|=936|=952|=955|=963).*\n', '', x)
+        #CHANGE 001 to 002
+        x = re.sub('(?m)^=001', '=002', x)
+        #ADD 002, 003, 730, 949 before supplied 008
+        x = re.sub('(?m)^=008', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*bn=buint;b3=z;\n=730  0\\$aMaking of the modern world (Online).$5OCU\n=003  ER-MOMW-3\n=002  MOMW-3\n=008', x)
+        #ADD subfield delimiter to series
+        x = re.sub('(=[490|830].*?) (part.*)', '\\1$n\\2', x) 
+        #CHANGE indicators on URL
+        x = re.sub('=856  ..', '=856  40', x)
+        x = utilities.Standardize856_956(x)
+        x = utilities.AddEresourceGMD(x)
         x = utilities.DeleteLocGov(x)
         x = utilities.CharRefTrans(x)
         x = utilities.MarcEditSaveToMRK(x)
@@ -1921,13 +1960,13 @@ class batchEdits:
         return x
 
     def ER_DOAB(self, x, name='ER-DOAB'):
-        print ('\nRunning change script '+ name + '\n')
+        print '\nRunning change script '+ name + '\n'
         langdict = MARC_lang.LangToMarcCode
         x = utilities.MarcEditBreakFile(x)
         #CHANGE 001 to 002
         x = re.sub('(?m)^=001  ', '=002  doab_', x)
         #ADD 002, 003, 730, 949 before supplied 008
-        x = re.sub('(?m)^=008', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*b3=z;bn=buint;\n=730  0\\$aDirectory of open access books.$5OCU\n=003  ER-DOAB\n=008', x)
+        x = re.sub('(?m)^=008', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*bn=buint;b3=z;\n=730  0\\$aDirectory of open access books.$5OCU\n=003  ER-DOAB\n=008', x)
         #Standardize 007
         x = re.sub('(?m)^=007.*', '=007  cr|mnu', x)
         #Remove empty page numbers 300
@@ -2000,11 +2039,11 @@ class batchEdits:
         return x
 
     def ER_OL_YBPeappr(self, x, name='ER-O/L-YBPeappr '):
-        print ('\nRunning change script '+ name + '\n')
+        print '\nRunning change script '+ name + '\n'
         #break the file
         x = utilities.MarcEditBreakFile(x)
         #insert 949, 002, 003 before 008 field
-        x = re.sub('(?m)^=008', r'=949  \\1$lolink$rs$t99\n=949  \\\\$a*bn=bolin;\n=003  ER-O/L-YBPeappr\n=002  O/L-YBPebkpilot\n=008', x)
+        x = re.sub('(?m)^=008', r'=949  \\1$lolink$rs$t99\n=949  \\\\$a*bn=bolin;b3=z;\n=003  ER-O/L-YBPeappr\n=002  O/L-YBPebkpilot\n=008', x)
         #change $z message to standard
         x = re.sub('(?m)\$zConnect to resource$', r'$zConnect to resource online', x)
         x = re.sub('\$zConnect to resource \(Off-campus access\)', '$zConnect to resource online (Off Campus Access)', x)
@@ -2016,11 +2055,11 @@ class batchEdits:
         return x
 
     def ER_OL_YBPeDDA_disc(self, x, name='ER-O/L-YBPeDDA-disc'):
-        print ('\nRunning change script '+ name + '\n')
+        print '\nRunning change script '+ name + '\n'
         #break the file
         x = utilities.MarcEditBreakFile(x)
         #insert 949, 002, 003 before 008 field
-        x = re.sub('(?m)^=008', r'=949  \\1$lolink$rs$t99\n=949  \\\\$a*bn=bolin;\n=948  \\\\$aARL STATS - OLYPBedda record; record stat when replaced with OCLC record; tjac\n=003  {}\n=008'.format(name), x)
+        x = re.sub('(?m)^=008', r'=949  \\1$lolink$rs$t99\n=949  \\\\$a*bn=bolin;b3=z;\n=948  \\\\$aARL STATS - OLYPBedda record; record stat when replaced with OCLC record; tjac\n=003  {}\n=008'.format(name), x)
         
         #split to get docID and insert in =002
         x = x.split('\n\n')
@@ -2028,9 +2067,9 @@ class batchEdits:
         try:
             x = [record + '\n=002  ebr{}'.format(re.search('(?m)docID=(\d*)', record).group(1)) for record in x]
         except AttributeError:
-            input('\a\a\a\n\tRECORD MISSING EBRARY docID!!!!!!!!!!')
+            raw_input('\a\a\a\n\tRECORD MISSING EBRARY docID!!!!!!!!!!')
             sys.exit()
-        #print (x)
+        #print x
         x = '\n\n'.join(x)
         #change $z message to standard
         x = re.sub('(?m)\$zConnect to resource$', r'$zConnect to resource online', x)
@@ -2043,11 +2082,11 @@ class batchEdits:
         return x
 
     def ER_OL_YBPeDDA_inv(self, x, name='ER-O/L-YBPeDDA-inv'):
-        print ('\nRunning change script '+ name + '\n')
+        print '\nRunning change script '+ name + '\n'
         #break the file
         x = utilities.MarcEditBreakFile(x)
         #insert 949, 002, 003 before 008 field
-        x = re.sub('(?m)^=008', r'=949  \\1$lolink$rs$t99\n=949  \\\\$a*bn=bolin;\n=948  \\\\$aARL STATS - OLYPBedda record; record stat when replaced with OCLC record; tjac\n=003  {}\n=008'.format(name), x)
+        x = re.sub('(?m)^=008', r'=949  \\1$lolink$rs$t99\n=949  \\\\$a*bn=bolin;b3=z;\n=948  \\\\$aARL STATS - OLYPBedda record; record stat when replaced with OCLC record; tjac\n=003  {}\n=008'.format(name), x)
         
         #split to get docID and insert in =002
         x = x.split('\n\n')
@@ -2055,9 +2094,9 @@ class batchEdits:
         try:
             x = [record + '\n=002  ebr{}'.format(re.search('(?m)docID=(\d*)', record).group(1)) for record in x]
         except AttributeError:
-            input('\a\a\a\n\tRECORD MISSING EBRARY docID!!!!!!!!!!')
+            raw_input('\a\a\a\n\tRECORD MISSING EBRARY docID!!!!!!!!!!')
             sys.exit()
-        #print (x)
+        #print x
         x = '\n\n'.join(x)
 
         #change $z message to standard
@@ -2072,13 +2111,13 @@ class batchEdits:
 
     def ER_Momentum(self, x, name='ER-Momentum'):
     #used OCLC bibs instead of supplied bibs; added 003 and 730 as below
-        print ('\nRunning change script '+ name + '\n')
+        print '\nRunning change script '+ name + '\n'
         #break the file
         x = utilities.MarcEditBreakFile(x)
         #insert 949, 002, 003, 730 before 008 field
         x = re.sub('(?m)^=001', '=002', x)
         #x = re.sub('(?m)^=008', '=003  ER-Momentum\n=008', x)
-        x = re.sub('(?m)^=008', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*b3=z;bn=buint;\n=730  0\\$aMomentum Press ebooks.$5OCU\n=003  ER-Momentum\n=008', x)
+        x = re.sub('(?m)^=008', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*bn=buint;b3=z;\n=730  0\\$aMomentum Press ebooks.$5OCU\n=003  ER-Momentum\n=008', x)
         x = utilities.Standardize856_956(x, 'Momentum')
         x = utilities.DeleteLocGov(x)
         x = utilities.CharRefTrans(x)
@@ -2088,7 +2127,7 @@ class batchEdits:
         return x
 
     def ER_WestAcademic(self, x, name='ER-WestAdademic'):
-        print ('\nRunning change script '+ name + '\n')
+        print '\nRunning change script '+ name + '\n'
         x = utilities.MarcEditBreakFile(filename)
         # delete supplied 949 field
         x = re.sub('(?m)^=949.*\n', '', x)
@@ -2099,7 +2138,7 @@ class batchEdits:
         #Change =001 field to =002, and add =003
         x = re.sub('(?m)^=001  (.*)', '=002  westacademic_\\1\n=003  ER-WestAcademic', x)
         #ADD 730, 949 fields before supplied 008
-        x = re.sub('(?m)^=008', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*b3=z;bn=buint;\n=730  0\\$aWest Academic Publishing Study Aids.$5OCU\n=506  \\\\$aLicensed for use only by University of Cincinnati law students.\n=008', x)
+        x = re.sub('(?m)^=008', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*bn=buint;b3=z;\n=730  0\\$aWest Academic Publishing Study Aids.$5OCU\n=506  \\\\$aLicensed for use only by University of Cincinnati law students.\n=008', x)
         #Add customized $3 and standard $z at end of 856
         x = re.sub('(=856.*)', '\\1$3Study Aids: Access limited to UC Law faculty and students : $zConnect to resource online', x)
         x = utilities.DeleteLocGov(x)
@@ -2112,14 +2151,14 @@ class batchEdits:
         return x
 
     def ER_WestlawNext(self, x, name='ER-WestlawNext'):
-        print ('\nRunning change script '+ name + '\n')
+        print '\nRunning change script '+ name + '\n'
         x = utilities.MarcEditBreakFile(filename)
         # delete supplied 949 field
         x = re.sub('(?m)^=949.*\n', '', x)
         #Change =001 field to =002, and add =003
         x = re.sub('(?m)^=001  (.*)', '=002  westlawnext_\\1\n=003  ER-WestlawNext', x)
         #ADD 730, 949 fields before supplied 008
-        x = re.sub('(?m)^=008', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*b2=s;b3=z;bn=buint;\n=730  0\\$aWestlawNext.$5OCU\n=730  0\\$aWestlawNext E-treatises.$5OCU\n=008', x)
+        x = re.sub('(?m)^=008', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*bn=buint;b2=s;b3=z;\n=730  0\\$aWestlawNext.$5OCU\n=730  0\\$aWestlawNext E-treatises.$5OCU\n=008', x)
         x = utilities.DeleteLocGov(x)
         x = utilities.AddEresourceGMD(x)
         #x = utilities.Standardize856_956(x, 'WestlawNext')
@@ -2130,17 +2169,14 @@ class batchEdits:
         return x
 
     def ER_WoltersKluwer_Cheetah(self, x, name='ER-WoltersKluwer-Cheetah'):
-        print ('\nRunning change script ' + name + '\n')
+        print '\nRunning change script '+ name + '\n'
         x = utilities.MarcEditBreakFile(filename)
-        # Change =001 field to =002, and add =003
+        #Change =001 field to =002, and add =003
         x = re.sub('(?m)^=001  (.*)', '=002  cheetah_\\1\n=003  ER-WlK-Cheetah', x)
-        # ADD 730, 949 fields before supplied 008
-        x = re.sub('(?m)^=008',
-                   r'=949  \\1$luint$rs$t99\n=949  \\\\$a*b3=z;bn=buint;\n=730  0\\$aWolters Kluwer.$pCheetah.$5OCU\n=506  \\\\$aLicensed for use only by University of Cincinnati law faculty and students.\n=008',
-                   x)
-        # Add customized $3 and standard $z at end of 856
-        x = re.sub('(=856.*)', '\\1$3?Cheetah: Access limited to UC Law faculty and students : $zConnect to resource',
-                   x)
+        #ADD 730, 949 fields before supplied 008
+        x = re.sub('(?m)^=008', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*bn=buint;b3=z;\n=730  0\\$aWolters Kluwer.$pCheetah.$5OCU\n=506  \\\\$aLicensed for use only by University of Cincinnati law faculty and students.\n=008', x)
+        #Add customized $3 and standard $z at end of 856
+        x = re.sub('(=856.*)', '\\1$3?Cheetah: Access limited to UC Law faculty and students : $zConnect to resource', x)
         x = utilities.DeleteLocGov(x)
         x = utilities.AddEresourceGMD(x)
         x = utilities.CharRefTrans(x)
@@ -2149,12 +2185,12 @@ class batchEdits:
         return x
 
     def ER_WoltersKluwer_IntelliConnect(self, x, name='ER-WoltersKluwer-IntelliConnect'):
-        print ('\nRunning change script '+ name + '\n')
+        print '\nRunning change script '+ name + '\n'
         x = utilities.MarcEditBreakFile(filename)
         #Change =001 field to =002, and add =003
         x = re.sub('(?m)^=001  (.*)', '=002  intelliconnect_\\1\n=003  ER-WlK-IntelliConnect', x)
         #ADD 730, 949 fields before supplied 008
-        x = re.sub('(?m)^=008', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*b3=z;bn=buint;\n=730  0\\$aWolters Kluwer.$pIntelliconnect.$5OCU\n=506  \\\\$aLicensed for use only by University of Cincinnati law faculty and students.\n=008', x)
+        x = re.sub('(?m)^=008', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*bn=buint;b3=z;\n=730  0\\$aWolters Kluwer.$pIntelliconnect.$5OCU\n=506  \\\\$aLicensed for use only by University of Cincinnati law faculty and students.\n=008', x)
         #Add customized $3 and standard $z at end of 856
         x = re.sub('(=856.*)', '\\1$3IntelliConnect: Access limited to UC Law faculty and students : $zConnect to resource', x)
         x = utilities.DeleteLocGov(x)
@@ -2164,16 +2200,46 @@ class batchEdits:
         x = utilities.MarcEditMakeFile(x)
         return x
 
+    def ER_BergFashion(self, x, name='ER-BergFashion'):
+        print '\nRunning change script '+ name + '\n'
+        x = utilities.MarcEditBreakFile(filename)
+        #x = re.sub('(?m)^=001  (.*)', '=002  bfl_\\1', x)
+        x = re.sub('(?m)^=001  ', '=002  bfl_', x) 
+        #ADD 003, 006, 007, 533, 730, 949 before supplied 008
+        x = re.sub('(?m)^=008', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*bn=buint;b3=z;\n=730  0\\$aBerg Fashion Library.$5OCU\n=003  ER-BergFashion\n=008', x)
+        x = utilities.DeleteLocGov(x)
+        x = utilities.Standardize856_956(x, 'Bloomsbury Fashion Central')
+        x = utilities.CharRefTrans(x)
+        x = utilities.AddEresourceGMD(x)
+        x = utilities.MarcEditSaveToMRK(x)
+        x = utilities.MarcEditMakeFile(x)
+        return x
+
+    def ER_OSEO(self, x, name='ER-OSEO'):
+        print '\nRunning change script '+ name + '\n'
+        x = utilities.MarcEditBreakFile(filename)
+        #x = re.sub('(?m)^=001  (.*)', '=002  oseo_\\1', x)
+        x = re.sub('(?m)^=001  ', '=002  oseo_', x) 
+        #ADD 003, 006, 007, 533, 730, 949 before supplied 008
+        x = re.sub('(?m)^=008', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*bn=buint;b3=z;\n=730  0\\$aOxford scholarly editions online.$5OCU\n=003  ER-OSEO\n=008', x)
+        x = re.sub('(?m)^(=856.*)', '\\1$zConnect to resource', x)
+        x = utilities.DeleteLocGov(x)
+        #x = utilities.Standardize856_956(x, '')
+        x = utilities.CharRefTrans(x)
+        x = utilities.AddEresourceGMD(x)
+        x = utilities.MarcEditSaveToMRK(x)
+        x = utilities.MarcEditMakeFile(x)
+        return x
 
     def ER_HeinOnline_ALI(self, x, name='ER-HeinOnline-ALI'):
-        print ('\nRunning change script '+ name + '\n')
+        print '\nRunning change script '+ name + '\n'
         x = utilities.MarcEditBreakFile(filename)
         # delete supplied 949 field
         x = re.sub('(?m)^=949.*\n', '', x)
         #Change =001 field to =002, and add =003
         x = re.sub('(?m)^=001  (.*)', '=002  heinonlineali_\\1\n=003  ER-HeinOnline-ALI', x)
         #ADD 730, 949 fields before supplied 008
-        x = re.sub('(?m)^=008', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*b3=z;bn=buint;\n=730  0\\$aHeinOnline.$pAmerican Law Institute Library.$5OCU\n=506  \\\\$aLicensed for use only by University of Cincinnati law students.\n=008', x)
+        x = re.sub('(?m)^=008', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*bn=buint;b3=z;\n=730  0\\$aHeinOnline.$pAmerican Law Institute Library.$5OCU\n=506  \\\\$aLicensed for use only by University of Cincinnati law students.\n=008', x)
         #Add customized $3 and standard $z at end of 856
         x = utilities.DeleteLocGov(x)
         x = utilities.AddEresourceGMD(x)
@@ -2185,7 +2251,7 @@ class batchEdits:
         return x
 
     def ER_LEXIS_PRIMARY(self, x, name='ER-LEXIS-PRIMARY'):
-        print ('\nRunning change script '+ name + '\n')
+        print '\nRunning change script '+ name + '\n'
         x = utilities.MarcEditBreakFile(filename)
         # delete supplied 949 field
         x = re.sub('(?m)^=949.*\n', '', x)
@@ -2193,7 +2259,7 @@ class batchEdits:
         x = re.sub('(?m)^=001  (.*)', '=002  lexisprimary_\\1\n=003  ER-LEXIS-Primary', x)
         x = re.sub('(?m)^=730.*Soures.*\n', '', x)
         #ADD 730, 949 fields before supplied 008
-        x = re.sub('(?m)^=008', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*b3=z;bn=buint;\n=730  0\\$aLEXIS Primary sources collection.$5OCU\n=506  \\\\$aLicensed for use only by University of Cincinnati law students.\n=008', x)
+        x = re.sub('(?m)^=008', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*bn=buint;b3=z;\n=730  0\\$aLEXIS Primary sources collection.$5OCU\n=506  \\\\$aLicensed for use only by University of Cincinnati law students.\n=008', x)
         #USE customized $3 and standard $z at end of 856/956
         x = utilities.DeleteLocGov(x)
         x = utilities.AddEresourceGMD(x)
@@ -2204,7 +2270,7 @@ class batchEdits:
         return x
 
     def ER_LEXIS_Periodicals(self, x, name='ER-LEXIS-Periodicals'):
-        print ('\nRunning change script '+ name + '\n')
+        print '\nRunning change script '+ name + '\n'
         x = utilities.MarcEditBreakFile(filename)
         # delete supplied 949 field
         x = re.sub('(?m)^=949.*\n', '', x)
@@ -2212,7 +2278,7 @@ class batchEdits:
         x = re.sub('(?m)^=001  (.*)', '=002  lexisperiodical_\\1\n=003  ER-LEXIS-Periodicals', x)
         x = re.sub('(?m)^=730.*Periodicals.*\n', '', x)
         #ADD 730, 949 fields before supplied 008
-        x = re.sub('(?m)^=008', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*b3=z;bn=buint;\n=730  0\$aLEXIS Periodicals Collection.$5OCU\n=506  \\\\$aLicensed for use only by University of Cincinnati law students.\n=008', x)
+        x = re.sub('(?m)^=008', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*bn=buint;b3=z;\n=730  0\$aLEXIS Periodicals Collection.$5OCU\n=506  \\\\$aLicensed for use only by University of Cincinnati law students.\n=008', x)
         #Add customized $3 and standard $z at end of 856
         x = utilities.DeleteLocGov(x)
         x = utilities.AddEresourceGMD(x)
@@ -2225,12 +2291,12 @@ class batchEdits:
 
     def ER_KanopySV_DDA(self, x, name='ER-KanopySV-DDA'):
     
-        print ('\nRunning change script '+ name + '\n')
+        print '\nRunning change script '+ name + '\n'
         x = utilities.MarcEditBreakFile(x)    
         #Change =001 field to =002, and add =003
         x = re.sub('(?m)^=001  (.*)', '=002  kanopysv_\\1\n=003  ER-KanopySV-DDA', x)
         #ADD 730, 949 fields before supplied 008
-        x = re.sub('(?m)^=008', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*b3=z;bn=buint;\n=730  0\\$aKanopy Streaming Videos.$5OCU\n=008', x)
+        x = re.sub('(?m)^=008', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*bn=buint;b3=z;\n=730  0\\$aKanopy Streaming Videos.$5OCU\n=008', x)
         x = utilities.DeleteLocGov(x)
         x = utilities.AddEresourceGMD(x)
         x = utilities.Standardize856_956(x, 'Kanopy Streaming')
@@ -2242,29 +2308,29 @@ class batchEdits:
 
     def ER_FableLearning(self, x, name='ER-Fable Learning'):
     
-        print ('\nRunning change script '+ name + '\n')
+        print '\nRunning change script '+ name + '\n'
         x = utilities.MarcEditBreakFile(x)    
         #Change =001 field to =002, and add =003
         x = re.sub('(?m)^=001  (.*)', '=002  fl_\\1\n=003  ER-Fable Learning', x)
         #ADD 730, 949 fields before supplied 008
-        x = re.sub('(?m)^=008', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*b3=z;bn=buint;\n=710  2\\$aIsabella Products, Inc.\n=730  0\\$aFable Learning Ebooks.$5OCU\n=008', x)
+        x = re.sub('(?m)^=008', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*bn=buint;b3=z;\n=710  2\\$aIsabella Products, Inc.\n=730  0\\$aFable Learning Ebooks.$5OCU\n=008', x)
         x = utilities.DeleteLocGov(x)
         x = utilities.AddEresourceGMD(x)
         
         x = utilities.Standardize856_956(x, 'Authorized UC users: to access Fable Learning ebooks: Click \"Sign in Here to Read Your Book\"; then \"Click here to read eBooks\"; then \"Read Now\"')
-        input()
+        raw_input()
         x = utilities.CharRefTrans(x)
         x = utilities.MarcEditSaveToMRK(x)
         x = utilities.MarcEditMakeFile(x)
         return x
 
     def ER_FOD(self, x, name='ER-FoDSV'):
-        print ('\nRunning change script '+ name + '\n')
+        print '\nRunning change script '+ name + '\n'
         x = utilities.MarcEditBreakFile(x)    
         #Change =001 field to =002, and add =003
         x = re.sub('(?m)^=001  (.*)', '=002  fod_\\1\n=003  ER-FoDSV', x)
         #ADD 730, 949 fields before supplied 008
-        x = re.sub('(?m)^=008', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*b3=z;bn=buint;\n=730  0\\$aFilms on Demand Streaming Video.$5OCU\n=008', x)
+        x = re.sub('(?m)^=008', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*bn=buint;b3=z;\n=730  0\\$aFilms on Demand Streaming Video.$5OCU\n=008', x)
         x = re.sub('(?m)\$h\[electronic resource \(video\)\]', '$h[electronic resource]', x)
         x = utilities.DeleteLocGov(x)
         x = utilities.AddEresourceGMD(x)
@@ -2276,12 +2342,12 @@ class batchEdits:
         return x
 
     def ER_GSW(self, x, name='ER-GSW'):
-        print ('\nRunning change script '+ name + '\n')
+        print '\nRunning change script '+ name + '\n'
         x = utilities.MarcEditBreakFile(filename)
         #Change =001 field to =002, and add =003
         x = re.sub('(?m)^=001  (.*)', '=002  gsw_\\1\n=003  ER-GSW', x)
         #ADD 730, 949 fields before supplied 008
-        x = re.sub('(?m)^=008', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*b3=z;bn=buint;\n=730  0\\$aGeoScienceWorld.$5OCU\n=008', x)
+        x = re.sub('(?m)^=008', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*bn=buint;b3=z;\n=730  0\\$aGeoScienceWorld.$5OCU\n=008', x)
         x = utilities.DeleteLocGov(x)
         x = utilities.AddEresourceGMD(x)
         x = utilities.Standardize856_956(x, 'GeoScienceWorld')
@@ -2292,14 +2358,14 @@ class batchEdits:
         return x
 
     def ER_LoebCL(self, x, name='ER-LoebCL'):
-        print ('\nRunning change script '+ name + '\n')
+        print '\nRunning change script '+ name + '\n'
         x = utilities.MarcEditBreakFile(filename)
         # delete supplied 949 field
         x = re.sub('(?m)^=949.*\n', '', x)
         #Change =001 field to =002, and add =003
         x = re.sub('(?m)^=001  (.*)', '=002  lcl_\\1\n=003  ER-LoebCL', x)
         #ADD 730, 949 fields before supplied 008
-        x = re.sub('(?m)^=008', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*b3=z;bn=buint;\n=730  0\\$aDigital Loeb Classical Library.$5OCU\n=008', x)
+        x = re.sub('(?m)^=008', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*bn=buint;b3=z;\n=730  0\\$aDigital Loeb Classical Library.$5OCU\n=008', x)
         x = utilities.DeleteLocGov(x)
         x = utilities.AddEresourceGMD(x)
         x = utilities.Standardize856_956(x, 'Loeb Classical Library')
@@ -2310,14 +2376,14 @@ class batchEdits:
         return x
 
     def ER_CHO(self, x, name='ER-CHO'):
-        print ('\nRunning change script '+ name + '\n')
+        print '\nRunning change script '+ name + '\n'
         x = utilities.MarcEditBreakFile(filename)
         # delete supplied 949 field
         x = re.sub('(?m)^=949.*\n', '', x)
         #Change =001 field to =002, and add =003
         x = re.sub('(?m)^=001  (.*)', '=002  cho_\\1\n=003  ER-CHO', x)
         #ADD 730, 949 fields before supplied 008
-        x = re.sub('(?m)^=008', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*b3=z;bn=buint;\n=730  0\\$aCambridge histories online.$5OCU\n=008', x)
+        x = re.sub('(?m)^=008', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*bn=buint;b3=z;\n=730  0\\$aCambridge histories online.$5OCU\n=008', x)
         x = utilities.DeleteLocGov(x)
         x = utilities.AddEresourceGMD(x)
         x = utilities.Standardize856_956(x, 'Cambridge Core')
@@ -2328,14 +2394,14 @@ class batchEdits:
         return x
 
     def ER_CCO(self, x, name='ER-CCO'):
-        print ('\nRunning change script '+ name + '\n')
+        print '\nRunning change script '+ name + '\n'
         x = utilities.MarcEditBreakFile(filename)
         # delete supplied 949 field
         x = re.sub('(?m)^=949.*\n', '', x)
         #Change =001 field to =002, and add =003
         x = re.sub('(?m)^=001  (.*)', '=002  cco_\\1\n=003  ER-CCO', x)
         #ADD 730, 949 fields before supplied 008
-        x = re.sub('(?m)^=008', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*b3=z;bn=buint;\n=730  0\\$aCambridge companions  online.$5OCU\n=008', x)
+        x = re.sub('(?m)^=008', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*bn=buint;b3=z;\n=730  0\\$aCambridge companions  online.$5OCU\n=008', x)
         x = utilities.DeleteLocGov(x)
         x = utilities.AddEresourceGMD(x)
         x = utilities.Standardize856_956(x, 'Cambridge Core')
@@ -2347,14 +2413,14 @@ class batchEdits:
 
     def ER_CC_Music(self, x, name='ER-CC-Music'):
     
-        print ('\nRunning change script '+ name + '\n')
+        print '\nRunning change script '+ name + '\n'
         x = utilities.MarcEditBreakFile(filename)
         # delete supplied 949 field
         x = re.sub('(?m)^=949.*\n', '', x)
         #Change =001 field to =002, and add =003
         x = re.sub('(?m)^=001  (.*)', '=002  ccmusic_\\1\n=003  ER-CC-Music', x)
         #ADD 730, 949 fields before supplied 008
-        x = re.sub('(?m)^=008', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*b3=z;bn=buint;\n=730  0\\$aCambridge companions to music online.$5OCU\n=008', x)
+        x = re.sub('(?m)^=008', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*bn=buint;b3=z;\n=730  0\\$aCambridge companions to music online.$5OCU\n=008', x)
         x = utilities.DeleteLocGov(x)
         x = utilities.AddEresourceGMD(x)
         x = utilities.Standardize856_956(x, 'Cambridge Core')
@@ -2365,12 +2431,12 @@ class batchEdits:
         return x
 
     def ER_SRMO(self, x, name='ER-SRMO'):
-        print ('\nRunning change script '+ name + '\n')
+        print '\nRunning change script '+ name + '\n'
         x = utilities.MarcEditBreakFile(x)    
         #Change =001 field to =002, and add =003
         x = re.sub('(?m)^=001  (.*)', '=002  srmo_\\1\n=003  ER-SRMO', x)
         #ADD 730, 949 fields before supplied 008
-        x = re.sub('(?m)^=008', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*b3=z;bn=buint;\n=730  0\\$aSAGE Research Methods Online.$5OCU\n=008', x)
+        x = re.sub('(?m)^=008', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*bn=buint;b3=z;\n=730  0\\$aSAGE Research Methods Online.$5OCU\n=008', x)
         x = re.sub('(?m)\$h\[electronic resource \(video\)\]', '$h[electronic resource]', x)
         x = utilities.DeleteLocGov(x)
         x = utilities.AddEresourceGMD(x)
@@ -2381,14 +2447,14 @@ class batchEdits:
         return x
 
     def ER_Rand(self, x, name='ER-Rand'):
-        print ('\nRunning change script '+ name + '\n')
+        print '\nRunning change script '+ name + '\n'
         x = utilities.MarcEditBreakFile(filename)
         # delete supplied 949 field
         x = re.sub('(?m)^=949.*\n', '', x)
         #Change =001 field to =002, and add =003
         x = re.sub('(?m)^=001  (.*)', '=002  rand_\\1\n=003  ER-Rand', x)
         #ADD 730, 949 fields before supplied 008
-        x = re.sub('(?m)^=008', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*b3=z;bn=buint;\n=730  0\\$aRand publications.$5OCU\n=008', x)
+        x = re.sub('(?m)^=008', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*bn=buint;b3=z;\n=730  0\\$aRand publications.$5OCU\n=008', x)
         x = utilities.DeleteLocGov(x)
         x = utilities.AddEresourceGMD(x)
         x = utilities.Standardize856_956(x, 'Rand publications')
@@ -2399,12 +2465,12 @@ class batchEdits:
         return x
 
     def ER_ASCE_Library(self, x, name='ER-ASCE-Library'):
-        print ('\nRunning change script '+ name + '\n')
+        print '\nRunning change script '+ name + '\n'
         x = utilities.MarcEditBreakFile(x)
         #Change =001 field to =002, and add =003
         x = re.sub('(?m)^=001  (.*)', '=002  asce_\\1\n=003  ER-ASCE-Library', x)
         #ADD 730, 949 fields before supplied 008
-        x = re.sub('(?m)^=008', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*b3=z;bn=buint;\n=730  0\\$aASCE Library.$5OCU\n=008', x)
+        x = re.sub('(?m)^=008', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*bn=buint;b3=z;\n=730  0\\$aASCE Library.$5OCU\n=008', x)
         x = utilities.AddEresourceGMD(x)
         #x = Bcode2CheckForSerial(x)
         x = utilities.Standardize856_956(x, 'ASCE Library')
@@ -2415,10 +2481,10 @@ class batchEdits:
         return x
 
     def ER_OTL(self, x, name='ER-OTL'):
-        print ('\nRunning change script '+ name + '\n')
+        print '\nRunning change script '+ name + '\n'
         x = utilities.MarcEditBreakFile(x)
         #Insert 002, 003, 730, 949 before supplied 008
-        x = re.sub('(?m)^=008', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*bn=buint;\n=730  0\\$aOpen Textbook Library (OTL).|5OCU\n=003  ER-OTL\n=002  OTL\n=008', x)
+        x = re.sub('(?m)^=008', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*bn=buint;b3=z;\n=730  0\\$aOpen Textbook Library (OTL).|5OCU\n=003  ER-OTL\n=002  OTL\n=008', x)
         x = utilities.DeleteLocGov(x)
         x = utilities.Standardize856_956(x, 'Open Textbook Library')
         x = utilities.CharRefTrans(x)
@@ -2428,7 +2494,7 @@ class batchEdits:
         return x
 
     def ER_Order007(self, x, name='ER-Order007'):
-        print ('\nRunning change script '+ name + '\n')
+        print '\nRunning change script '+ name + '\n'
         x = utilities.MarcEditBreakFile(filename)
         x = utilities.sort007(x)
         x = utilities.CharRefTrans(x)
@@ -2437,7 +2503,7 @@ class batchEdits:
         return x
 
     def ER_PQ_EEBO(self, x, name='ER-PQ-EEBO'):
-        print ('\nRunning change script '+ name + '\n')
+        print '\nRunning change script '+ name + '\n'
         #print filename
         x = utilities.MarcEditBreakFile(filename)
         # Change =001 field to =035, replace ocx with (OCoLC)
@@ -2446,7 +2512,7 @@ class batchEdits:
         x = re.sub('=001  oc[m,n]', r'=035  \\\\$a(OCoLC)', x)
         x = re.sub('=001  9', r'=035  \\\\$a(OCoLC)9', x)
         # ADD 002, 003, 506 local 730, 949 before supplied 008
-        x = re.sub('(?m)^=008', r'=949  \\\\$a*b3=z;bn=buint;\n=949  \\1$luint$rs$t99\n=730  0\$aEarly English books online (PQ).$5OCU\n=506  \\\\$aAccess restricted to users at subscribing institutionsn\n=003  ER-PQ-EEBO\n=002  EEBO\n=008', x)
+        x = re.sub('(?m)^=008', r'=949  \\\\$a*bn=buint;b3=z;\n=949  \\1$luint$rs$t99\n=730  0\$aEarly English books online (PQ).$5OCU\n=506  \\\\$aAccess restricted to users at subscribing institutionsn\n=003  ER-PQ-EEBO\n=002  EEBO\n=008', x)
         x = utilities.DeleteLocGov(x)
         x = utilities.Standardize856_956(x,'EEBO')
         x = utilities.CharRefTrans(x)
@@ -2456,12 +2522,12 @@ class batchEdits:
         return x
 
     def ER_ProjMuse_OA(self, x, name='ER-ProjMuse-OA'):
-        print ('\nRunning change script '+ name + '\n')
+        print '\nRunning change script '+ name + '\n'
         x = utilities.MarcEditBreakFile(x)
         #Change =001 field to =002, and add =003
         x = re.sub('(?m)^=001  (.*)', '=002  museopenaccess_\\1\n=003  ER-ProjMuse-OA', x)
         #ADD 730, 949 fields before supplied 008
-        x = re.sub('(?m)^=008', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*b3=z;bn=buint;\n=730  0\\$aProject MUSE (Open Access).$5OCU\n=008', x)
+        x = re.sub('(?m)^=008', r'=949  \\1$luint$rs$t99\n=949  \\\\$a*bn=buint;b3=z;\n=730  0\\$aProject MUSE (Open Access).$5OCU\n=008', x)
         x = utilities.AddEresourceGMD(x)
         #x = Bcode2CheckForSerial(x)
         x = utilities.Standardize856_956(x, 'Project MUSE')
@@ -2472,10 +2538,10 @@ class batchEdits:
         return x
 
     def ER_OL_CH_AELit(self, x, name='ER-O/L-CH-American and English Literature'):
-        print ('\nRunning change script '+ name + '\n')
+        print '\nRunning change script '+ name + '\n'
         x = utilities.MarcEditBreakFile(x)
         #Insert 002, 003, 730, 949 before supplied 008
-        x = re.sub('(?m)^=008', r'=949  \\1$lolink$rs$t99\n=949  \\\\$a*bn=bolin;\n=003  ER-O/L-CH-American & English Literature\n=002  O/L-CH-American & English Literature\n=730  0\\$aAmerican & English literature.$5OCU\n=008', x)
+        x = re.sub('(?m)^=008', r'=949  \\1$lolink$rs$t99\n=949  \\\\$a*bn=bolin;b3=z;\n=003  ER-O/L-CH-American & English Literature\n=002  O/L-CH-American & English Literature\n=730  0\\$aAmerican & English literature.$5OCU\n=008', x)
         x = utilities.AddEresourceGMD(x)
         x = utilities.DeleteLocGov(x)
         x = utilities.CharRefTrans(x)
@@ -2484,6 +2550,7 @@ class batchEdits:
         return x
 
 reStart = ''
+
 while reStart == '' or reStart == 'y':
     #Instantiate classes
     BatchEdits = batchEdits()
@@ -2508,13 +2575,10 @@ while reStart == '' or reStart == 'y':
 
     #select change script by index in dictionary
     SelectedProcess = utilities.ScriptSelect()
-    methodToCall = getattr(BatchEdits, ChangeScriptsDict[int(SelectedProcess)])
+    methodToCall = getattr(BatchEdits, ChangeScriptsDict[int(SelectedProcess)][0])
     result = methodToCall(filename)
-    print ('\nOutput File...\n\n\t\tEditing finished ')
+    print '\nOutput File...\n\n\t\tEditing finished '
     reStart = ''
     while reStart != 'y' and reStart != 'n':
-        reStart = input('\n\n\n Would you like to run BatchCave again? \n\n\n')
-        break
+        reStart = raw_input('\n\n\nWould you like to run BatchCave again? (y/n)\n\n\n')
 
-        #break #break is required here to restart the program or end it
-        #this doesn't consistently work 

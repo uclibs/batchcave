@@ -1,8 +1,0 @@
-Python 2 
-
-Edit to remove a URL with specific value 
-
-        x = re.sub('(?m)^=856.*EBSCOhost.*\n', '', x)
-        x = re.sub('(?m)^=856.*OhioLINK.*\n', '', x)
-        x = re.sub('(?m)^=856.*SpringerLink.*\n', '', x)
-        x = re.sub('(?m)^=856.*Wiley.*\n', '', x)
