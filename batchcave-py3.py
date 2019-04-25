@@ -12,6 +12,18 @@ from inspect import signature
 #MARC_lang
 from time import sleep, strftime
 
+try:
+   from configparser import ConfigParser
+except ImportError:
+   from ConfigParser import ConfigParser  # ver. < 3.0
+import subprocess
+
+# instantiate
+parser = ConfigParser()
+
+# parse existing file
+parser.read('C:\\Users\\crawfotj.AD\\Documents\\batchcave_PY3\\batchcave\\MarcEdit.ini')
+marc_edit = parser.get('MarcEdit', 'marcedit')
 
 print ("""________  ______   ___       ___________ 
 ___  __ \ ___  /   __ |     / /__  ____/ 
@@ -89,7 +101,8 @@ class utilityFunctions:
         print (x)
         mrkFileName = re.sub('.mrc', '.mrk', x)
         print ("\n<Breaking MARC file>\n")
-        subprocess.call(['C:\\%s\\MarcEdit 7\\cmarcedit.exe' % MarcEditDir, '-s', x, '-d', mrkFileName, '-break'])
+        #subprocess.call(['C:\\%s\\MarcEdit 7\\cmarcedit.exe' % MarcEditDir, '-s', x, '-d', mrkFileName, '-break'])
+        subprocess.call([marc_edit, MarcEditDir, '-s', x, '-d', mrkFileName, '-break'])
         x = open(mrkFileName).read()
         return x
 
@@ -98,13 +111,16 @@ class utilityFunctions:
         print (x)
         mrkFileName = re.sub('.mrc', '.mrk', x)
         print ("\n<Breaking MARC file>\n")
-        subprocess.call(['C:\\%s\\MarcEdit 7\\cmarcedit.exe' % MarcEditDir, '-s', x, '-d', mrkFileName, '-break', '-marc8'])
+        #subprocess.call(['C:\\%s\\MarcEdit 7\\cmarcedit.exe' % MarcEditDir, '-s', x, '-d', mrkFileName, '-break', '-marc8'])
+        subprocess.call([marc_edit, MarcEditDir, '-s', x, '-d', mrkFileName, '-break', '-marc8'])
+
         x = open(mrkFileName).read()
         return x
 
     def MarcEditMakeFile(self, x):
         print ('\n<Compiling file to MARC>\n')
-        subprocess.call(['C:\\%s\\MarcEdit 7\\cmarcedit.exe' % MarcEditDir, '-s', filenameNoExt + '_OUT.mrk', '-d', filenameNoExt + '_OUT.mrc', '-make'])
+        #subprocess.call(['C:\\%s\\MarcEdit 7\\cmarcedit.exe' % MarcEditDir, '-s', filenameNoExt + '_OUT.mrk', '-d', filenameNoExt + '_OUT.mrc', '-make'])
+        subprocess.call([marc_edit, MarcEditDir, '-s', filenameNoExt + '_OUT.mrk', '-d', filenameNoExt + '_OUT.mrc', '-make'])
         return x
     
     def MarcEditSaveToMRK(self, x):
@@ -116,7 +132,9 @@ class utilityFunctions:
     def MarcEditXmlToMarc(self, x):
         mrcFileName = re.sub('.xml', '.mrc', x)
         print ('\n<Converting from XML to MARC>\n')
-        subprocess.call(['C:\\%s\\MarcEdit 7\\cmarcedit.exe' % MarcEditDir, '-s', x, '-d', mrcFileName, '-xmlmarc', '-marc8', '-mxslt', 'C:\\%s\\MarcEdit 7\\xslt\\MARC21XML2Mnemonic_plugin.xsl' % MarcEditDir])
+        #subprocess.call(['C:\\%s\\MarcEdit 7\\cmarcedit.exe' % MarcEditDir, '-s', x, '-d', mrcFileName, '-xmlmarc', '-marc8', '-mxslt', 'C:\\%s\\MarcEdit 7\\xslt\\MARC21XML2Mnemonic_plugin.xsl' % MarcEditDir])
+        subprocess.call([marc_edit, MarcEditDir, '-s', x, '-d', mrcFileName, '-xmlmarc', '-marc8', '-mxslt', xml_plug, MarcEditDir])
+
         return mrcFileName
         # change this so it would work on marc edit 7 (couldn't download 6)
     def Standardize856_956(self, *args):
@@ -2508,7 +2526,7 @@ while reStart == '' or reStart == 'y':
 
     #select change script by index in dictionary
     SelectedProcess = utilities.ScriptSelect()
-    methodToCall = getattr(BatchEdits, ChangeScriptsDict[int(SelectedProcess)])
+    methodToCall = getattr(BatchEdits, ChangeScriptsDict[int(SelectedProcess) - 1])
     result = methodToCall(filename)
     print ('\nOutput File...\n\n\t\tEditing finished ')
     reStart = ''
