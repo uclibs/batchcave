@@ -77,7 +77,7 @@ class utilityFunctions:
         mrkFileName = re.sub('.mrc', '.mrk', x)
         print("\n<Breaking MARC file>\n")
         subprocess.call([MarcEditDir, '-s', x, '-d', mrkFileName, '-break'])
-        x = open(mrkFileName).read()
+        x = open(mrkFileName, encoding="utf-8").read()
         return x
 
     def MarcEditBreakFileTranslateToMarc8(self, x):
@@ -86,7 +86,7 @@ class utilityFunctions:
         mrkFileName = re.sub('.mrc', '.mrk', x)
         print("\n<Breaking MARC file>\n")
         subprocess.call([MarcEditDir, '-s', x, '-d', mrkFileName, '-break', '-marc8'])
-        x = open(mrkFileName).read()
+        x = open(mrkFileName, encoding="utf-8").read()
         return x
 
     def MarcEditMakeFile(self, x):
@@ -95,7 +95,7 @@ class utilityFunctions:
         return x
     
     def MarcEditSaveToMRK(self, x):
-        outfile = open(filenameNoExt + '_OUT.mrk', 'w')
+        outfile = open(filenameNoExt + '_OUT.mrk', 'w', encoding="utf-8")
         outfile.write(x)
         outfile.close()
         return
@@ -595,7 +595,7 @@ class utilityFunctions:
 
     def DedupRecords(self, x):
         x = x.split('\n\n')
-        x = filter(None, x)
+        x = list(filter(None, x))
         print('<Deduplicating records>\n\n\tInput Records: {}'.format(len(x)))
         x = list(set(x))
         print('\n\tOutput Records: {}'.format(len(x)))
@@ -606,7 +606,7 @@ class utilityFunctions:
     def Bcode2CheckForManuscript(self, x):
         x = x.split('\n\n')
         out = []
-        x = filter(None, x)
+        x = list(filter(None, x))
         for record in x:
             if record[12] == 't':
                 if re.search('b2=[-ka4m3noefvhprsgcdjit][;|\n]', record):
@@ -620,7 +620,7 @@ class utilityFunctions:
     def Bcode2CheckForSerial(self, x):
         x = x.split('\n\n')
         out = []
-        x = filter(None, x)
+        x = list(filter(None, x))
         for record in x:
             if record[13] == 's' or record[13] == 'b':
                 if re.search('b2=[-ka4m3noefvhprsgcdjit][;|\n]', record):
@@ -2309,7 +2309,7 @@ class batchEdits:
         
         #split to get docID and insert in =002
         x = x.split('\n\n')
-        x = filter(None, x)
+        x = list(filter(None, x))
         try:
             x = [record + '\n=002  ebr{}'.format(re.search('(?m)docID=(\d*)', record).group(1)) for record in x]
         except AttributeError:
@@ -2336,7 +2336,7 @@ class batchEdits:
         
         #split to get docID and insert in =002
         x = x.split('\n\n')
-        x = filter(None, x)
+        x = list(filter(None, x))
         try:
             x = [record + '\n=002  ebr{}'.format(re.search('(?m)docID=(\d*)', record).group(1)) for record in x]
         except AttributeError:
